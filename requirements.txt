@@ -1,0 +1,6 @@
+# Install with:  pip install -r requirements.txt
+# The simulation, the controllers, training, the experiments and the tests use the standard library only.
+# pygame opens the window ("--window"); without it everything else still works.
+pygame>=2.5.2
+# matplotlib draws the graphs. Without it experiments and training still run, only the PNG files are skipped.
+matplotlib>=3.8

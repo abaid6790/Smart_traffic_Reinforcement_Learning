@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual environments and secrets
+.venv/
+venv/
+.env
+
+# Logs
+logs/
+
+# Personal settings (create with: python main.py --write-settings)
+config/user_settings.json
+config/user_settings.json.tmp
+
+# Generated files (the folders themselves are kept via .gitkeep)
+models/*
+!models/.gitkeep
+results/csv/*
+!results/csv/.gitkeep
+results/graphs/*
+!results/graphs/.gitkeep
+results/reports/*
+!results/reports/.gitkeep
+
+# Editors, OS and temporary files
+.idea/
+.vscode/
+*.swp
+*.tmp
+.DS_Store
+Thumbs.db
