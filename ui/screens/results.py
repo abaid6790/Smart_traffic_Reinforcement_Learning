@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import logging
+import shutil
 from pathlib import Path
 
 import pygame
 
 from evaluation.experiment import LABELS
 from ui.app import Screen
+from utils.paths import safe_join
 from ui.components import draw_text, wrap_text
 from ui.results_data import (
     ExperimentInfo, list_experiments, list_graphs, read_experiment, scenario_names, scenario_view)
@@ -52,7 +54,43 @@ class ResultsScreen(Screen):
                                  "Previous scenario or graph", lambda: self.step_sub(-1), lambda: self.sub_count > 1)
         self.next_sub = self.add(lambda: "Scenario >" if self.shows_table else "Graph >", pygame.K_RIGHT, "Right",
                                  "Next scenario or graph", lambda: self.step_sub(1), lambda: self.sub_count > 1)
+        self.delete_button = self.add("Delete", pygame.K_DELETE, "Del", "Delete the selected item (asks first)",
+                                      self.confirm_delete, lambda: bool(self.items))
         self.back_button = self.add("Back", pygame.K_b, "Esc", "Return to the main menu", self.back)
+
+    # ---- deleting ---------------------------------------------------------------------------------
+
+    def confirm_delete(self) -> None:
+        if not self.items:
+            return
+        label, path, _ = self.items[self.index]
+        what = "this experiment and all its files" if self.mode == "experiments" else "this graph"
+        self.ask(f"Delete {what} ({label})? This cannot be undone.",
+                 ("Delete", self.delete_selected), ("Keep it", lambda: None))
+
+    def delete_selected(self) -> None:
+        if not self.items:
+            return
+        _, path, _ = self.items[self.index]
+        paths = self.app.paths
+        try:
+            if self.mode == "experiments":
+                folder = safe_join(paths.results_dir, path.name)
+                if not folder.name.startswith("experiment_") or not folder.is_dir():
+                    raise ValueError("That is not an experiment folder.")
+                shutil.rmtree(folder)
+            else:
+                graph = safe_join(paths.graph_dir, path.name)
+                if graph.suffix.lower() != ".png":
+                    raise ValueError("That is not a graph file.")
+                graph.unlink()
+        except (OSError, ValueError) as exc:
+            log.warning("Could not delete %s: %s", path, exc)
+            self.app.notify(f"Could not delete it: {getattr(exc, 'strerror', None) or exc}", "warning")
+        else:
+            self.app.notify("Deleted.")
+        self._image_cache = None
+        self.reload()
 
     # ---- data ---------------------------------------------------------------------------------------
 
@@ -142,6 +180,7 @@ class ResultsScreen(Screen):
         self.back_button.rect = pygame.Rect(x, bottom, round(120 * s), round(46 * s))
         self.newer.rect = pygame.Rect(x + round(130 * s), bottom, round(100 * s), round(46 * s))
         self.older.rect = pygame.Rect(x + round(238 * s), bottom, round(92 * s), round(46 * s))
+        self.delete_button.rect = pygame.Rect(x + round(342 * s), bottom, round(120 * s), round(46 * s))
         rx = round(390 * s)
         bw = round(110 * s)
         self.table_button.rect = pygame.Rect(rx, round(76 * s), bw, round(38 * s))

@@ -50,6 +50,10 @@ class ExperimentScreen(Screen):
     def running(self) -> bool:
         return self.job is not None and self.job.state in ACTIVE_STATES
 
+    def close(self) -> None:
+        if self.job is not None and self.job.active:
+            self.job.request_stop()
+
     def stop_job(self) -> None:
         if self.job is not None:
             self.job.request_stop()

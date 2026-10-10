@@ -129,5 +129,8 @@ def run_training(
             outcome.graph_files = list(save_training_graphs(history, Path(graph_dir), stamp))
         except ImportError:
             outcome.graph_note = "matplotlib is not installed, so no graphs were drawn."
+        except Exception:  # noqa: BLE001 - the model is already saved; graphs are a bonus
+            log.exception("Training graphs could not be saved")
+            outcome.graph_note = "The model was saved, but the graphs could not be drawn (see the log)."
     log.info("Training from the window finished: %d episodes, model %s", outcome.episodes_done, saved)
     return outcome

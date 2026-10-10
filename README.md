@@ -21,7 +21,8 @@ The project is being built slowly, one tested phase at a time.
 | 6 | Q-Learning agent, training (CSV log, safe stop, best-policy selection), model save/load | **Done** |
 | 7 | Experiments: fixed vs tuned fixed vs RL on identical seeds, statistics, graphs, CSV/JSON/Markdown export | **Done** |
 | 8 | Menu and screens: watch, compare side by side, train, experiment, results, settings, about | **Done** |
-| 9-11 | Reliability pass, docs, final QA | Next / planned |
+| 9 | Reliability pass: input limits, damaged-file handling, error safety net, delete confirmations ([docs/RELIABILITY.md](docs/RELIABILITY.md)) | **Done** |
+| 10-11 | Tests and documentation, final QA | Next / planned |
 
 See [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md) for what each phase delivers.
 Start the application with `python main.py --menu` (see [docs/USER_INTERFACE.md](docs/USER_INTERFACE.md)).
@@ -253,7 +254,7 @@ smart-traffic-rl/
 python -m unittest discover -s tests -t .
 ```
 
-520 tests currently pass (the window tests run without a display). Besides unit tests of each class, the simulator tests run
+543 tests currently pass (the window tests run without a display). Besides unit tests of each class, the simulator tests run
 whole simulations in every scenario, with and without aggressive light-switch
 requests, and verify on every step that: no vehicle runs a red light, no vehicles
 overlap, no conflicting traffic is in the crossing, no vehicle gets stuck, vehicles
@@ -288,6 +289,8 @@ Phase 8 tests click every button of every screen (also with the keyboard), check
 run, pause, stop and save from the window, that leaving asks first, that invalid settings can never be saved, that both
 sides of the comparison see identical traffic and give the same numbers as separate runs, and that every screen draws
 without overlapping buttons at several window sizes and in both themes.
+
+Phase 9 tests feed hostile settings and model files, odd command lines, failing file systems and broken screens to the program and check that it always answers with a clear message instead of crashing.
 
 The checks were themselves verified by deliberately injecting bugs (ignoring signals,
 removing following distance, wrong green times, wrong averages, flipped improvement

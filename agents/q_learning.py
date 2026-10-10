@@ -45,6 +45,9 @@ MODEL_FORMAT = "smart-traffic-rl-q-table"
 MODEL_VERSION = 1
 
 
+MAX_MODEL_FILE_BYTES = 5_000_000  # a real model is a few KB
+
+
 class ModelError(Exception):
     """A model file is missing, damaged or does not fit the current settings."""
 
@@ -251,6 +254,9 @@ class QLearningAgent:
 def _read_model_file(path: Path) -> dict[str, Any]:
     """Read and strictly check a model file; every problem becomes a ModelError."""
     try:
+        if path.stat().st_size > MAX_MODEL_FILE_BYTES:
+            raise ModelError(f"{path.name} is larger than {MAX_MODEL_FILE_BYTES // 1024} KB, "
+                             "so it is not a saved model.")
         text = path.read_text(encoding="utf-8")
     except FileNotFoundError:
         raise ModelError(f"Model file not found: {path}") from None
@@ -263,6 +269,8 @@ def _read_model_file(path: Path) -> dict[str, Any]:
     except json.JSONDecodeError as exc:
         raise ModelError(f"{path.name} is damaged or not a model file "
                          f"(invalid JSON at line {exc.lineno}).") from None
+    except (RecursionError, ValueError):
+        raise ModelError(f"{path.name} is damaged (too deeply nested or an absurd number).") from None
     if not isinstance(data, dict) or data.get("format") != MODEL_FORMAT:
         raise ModelError(f"{path.name} is not a model saved by this program.")
     if data.get("version") != MODEL_VERSION:
@@ -279,9 +287,46 @@ def _read_model_file(path: Path) -> dict[str, Any]:
     episodes = data["training"]["episodes"]
     if not isinstance(episodes, int) or isinstance(episodes, bool) or episodes < 0:
         raise ModelError(f"{path.name} is damaged (training episodes: {episodes!r}).")
+    _check_training_info(path, data)
     _check_table(path, "q_table", data["q_table"], numbers=float)
     _check_table(path, "visits", data["visits"], numbers=int)
     return data
+
+
+def _finite(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def _check_training_info(path: Path, data: dict[str, Any]) -> None:
+    """The description of how the model was trained is shown on screen, so check its types too."""
+    training = data["training"]
+
+    def damaged(what: str, value: Any) -> ModelError:
+        return ModelError(f"{path.name} is damaged ({what}: {value!r}).")
+
+    if "updates" in training and not (isinstance(training["updates"], int)
+                                      and not isinstance(training["updates"], bool)
+                                      and training["updates"] >= 0):
+        raise damaged("training updates", training["updates"])
+    if "final_epsilon" in training and not (_finite(training["final_epsilon"])
+                                            and 0 <= training["final_epsilon"] <= 1):
+        raise damaged("final epsilon", training["final_epsilon"])
+    scenarios = training.get("scenarios")
+    if scenarios is not None and not (isinstance(scenarios, list) and all(isinstance(x, str) for x in scenarios)):
+        raise damaged("trained scenarios", scenarios)
+    for key in ("best_episode", "base_seed"):
+        value = training.get(key)
+        if value is not None and not (isinstance(value, int) and not isinstance(value, bool) and value >= 0):
+            raise damaged(key.replace("_", " "), value)
+    for key in ("best_validation_waiting_time", "episode_seconds"):
+        value = training.get(key)
+        if value is not None and not _finite(value):
+            raise damaged(key.replace("_", " "), value)
+    if "saved_at" in data and not isinstance(data["saved_at"], str):
+        raise damaged("saved at", data["saved_at"])
+    for key, value in data["parameters"].items():
+        if not _finite(value):
+            raise damaged(f"parameter {key}", value)
 
 
 def _check_table(path: Path, name: str, table: Any, numbers: type) -> None:

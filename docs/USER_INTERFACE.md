@@ -26,6 +26,8 @@ every button has a keyboard key shown in its corner. Nothing is a placeholder: e
 * Training and experiments run in a background thread, so the window stays responsive. Leaving or closing the window
   while one is running asks whether to stop it; stopping saves what was learned (training) or the finished runs (experiment).
 * If a model is missing or damaged, the buttons that need it are disabled and say why when you hover them.
+* The Results screen can delete an experiment or graph, and the Training screen can delete the model; each asks first and is disabled while training runs.
+* The window cannot be made smaller than 640x480. If a screen hits an unexpected error it is logged and you return to the menu (details: `docs/RELIABILITY.md`).
 * A changed theme applies as soon as you press Save.
 * `python main.py --menu --screen settings` opens a screen directly; adding `--screenshot file.png` saves a picture
   without opening a window.

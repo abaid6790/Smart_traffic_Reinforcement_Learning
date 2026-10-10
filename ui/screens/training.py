@@ -41,6 +41,9 @@ class TrainingScreen(Screen):
                              self.stop_job, lambda: self.running and self.job.state != "stopping")
         self.watch = self.add("Watch trained agent", pygame.K_w, "W", "Open the simulation with the saved agent",
                               lambda: self.request_leave("watch_rl"), lambda: app.model_status()[0] == "ok")
+        self.delete_model = self.add("Delete model", None, "", "Delete the saved model file (asks first)",
+                                     self.confirm_delete_model,
+                                     lambda: not self.running and app.paths.model_path.exists())
         self.back_button = self.add("Back", pygame.K_b, "Esc", "Return to the main menu", self.back)
         self._announced = False
         self._series_len = -1
@@ -52,6 +55,21 @@ class TrainingScreen(Screen):
     def running(self) -> bool:
         return self.job is not None and self.job.state in ACTIVE_STATES
 
+    def confirm_delete_model(self) -> None:
+        self.ask(f"Delete the saved model ({self.app.paths.model_path.name})? You would have to train again "
+                 "before the agent can be watched or tested. This cannot be undone.",
+                 ("Delete model", self._delete_model), ("Keep it", lambda: None))
+
+    def _delete_model(self) -> None:
+        try:
+            self.app.paths.model_path.unlink()
+        except OSError as exc:
+            self.problem = f"The model could not be deleted: {exc.strerror or exc}."
+            return
+        self.continue_training = False
+        self.app._model_cache = None
+        self.app.notify("The saved model was deleted.")
+
     def toggle_mode(self) -> None:
         self.continue_training = not self.continue_training
 
@@ -62,6 +80,10 @@ class TrainingScreen(Screen):
             self.job.resume()
         else:
             self.job.pause()
+
+    def close(self) -> None:
+        if self.job is not None and self.job.active:
+            self.job.request_stop()
 
     def stop_job(self) -> None:
         if self.job is not None:
@@ -162,6 +184,7 @@ class TrainingScreen(Screen):
         bottom = size[1] - round(78 * s)
         self.back_button.rect = pygame.Rect(x, bottom, round(160 * s), round(46 * s))
         self.watch.rect = pygame.Rect(x + round(172 * s), bottom, round(250 * s), round(46 * s))
+        self.delete_model.rect = pygame.Rect(x + round(434 * s), bottom, round(190 * s), round(46 * s))
 
     def _chart_series(self):
         if len(self.history) != self._series_len:

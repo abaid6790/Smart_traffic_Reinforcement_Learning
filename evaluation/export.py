@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import csv
 import json
+import logging
 from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
@@ -41,6 +42,8 @@ RUN_COLUMNS = ("scenario", "controller", "run", "seed", "duration", "vehicles_ar
                "average_waiting_time_all", "max_waiting_time", "average_queue_length",
                "max_queue_length", "average_travel_time", "average_stops", "total_stops",
                "throughput_per_minute", "light_switches", "total_reward", "safety_violations")
+
+log = logging.getLogger(__name__)
 
 
 def experiment_folder(root: Path, result: ExperimentResult) -> Path:
@@ -237,7 +240,12 @@ def save_experiment(result: ExperimentResult, root: Path, graphs: bool = True) -
         json.dumps(to_json_data(result), indent=2), encoding="utf-8")
     (folder / "summary.md").write_text(markdown_report(result), encoding="utf-8")
     if graphs:
-        from evaluation.graphs import save_experiment_graphs  # needs matplotlib
-        save_experiment_graphs(result, folder / "graphs")
+        try:
+            from evaluation.graphs import save_experiment_graphs  # needs matplotlib
+            save_experiment_graphs(result, folder / "graphs")
+        except ImportError:
+            raise
+        except Exception:  # noqa: BLE001 - the numbers are already saved; a graph problem must not lose them
+            log.exception("Experiment graphs could not be drawn; the other files were saved")
     return folder
 

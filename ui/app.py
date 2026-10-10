@@ -9,6 +9,7 @@ whole thing draws on any pygame surface, so tests (and ``--screenshot``) need no
 from __future__ import annotations
 
 import logging
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -17,7 +18,7 @@ import pygame
 
 from agents.q_learning import ModelError, QLearningAgent
 from config.settings import Settings
-from ui.components import Button, Fonts, draw_text, wrap_text
+from ui.components import Button, Fonts, draw_text
 from ui.theme import Theme, get_theme
 from ui.widgets import Dialog
 from utils import paths as default_paths
@@ -27,6 +28,8 @@ log = logging.getLogger(__name__)
 WINDOW_TITLE = "Smart Traffic Light Control"
 DEFAULT_MODEL_NAME = "q_learning_model.json"
 TOAST_SECONDS = 6.0
+MIN_WINDOW = (640, 480)  # smaller windows cannot hold the screens; the size is raised to this
+MAX_CONSECUTIVE_FAILURES = 3
 
 
 @dataclass
@@ -99,6 +102,9 @@ class Screen:
 
     def on_enter(self) -> None:
         """Called once when the screen opens."""
+
+    def close(self) -> None:
+        """Called when the screen is left for any reason; stop anything still running."""
 
     def layout(self, size: tuple[int, int]) -> None:
         """Place the buttons for a window of this size."""
@@ -207,11 +213,13 @@ class App:
                  size: tuple[int, int] | None = None) -> None:
         self.settings = settings.validate()
         self.paths = paths or AppPaths.default()
-        self.size = size or (settings.display.window_width, settings.display.window_height)
+        self.size = clamp_size(size or (settings.display.window_width, settings.display.window_height))
         self.theme = get_theme(settings.display.theme)
         self.fonts = Fonts(max(0.67, min(2.0, self.size[1] / 720)))
         self.screen: Screen | None = None
         self.quit_requested = False
+        self.failures = 0  # consecutive frames that raised an unexpected error
+        self.fatal_message = ""
         self.toast: tuple[str, str] | None = None
         self._toast_left = 0.0
         self._model_cache: tuple[tuple, QLearningAgent | None, str] | None = None
@@ -222,6 +230,9 @@ class App:
         from ui.screens import SCREENS
         if name not in SCREENS:
             raise ValueError(f"Unknown screen '{name}'. Choose from: {', '.join(SCREENS)}.")
+        old = self.screen
+        if old is not None:
+            self._safely(old.close, "closing a screen")
         screen = SCREENS[name](self, **options)
         self.screen = screen
         log.info("Screen: %s", name)
@@ -238,8 +249,8 @@ class App:
         self._model_cache = None
 
     def resize(self, size: tuple[int, int]) -> None:
-        self.size = size
-        self.fonts = Fonts(max(0.67, min(2.0, size[1] / 720)))
+        self.size = clamp_size(size)
+        self.fonts = Fonts(max(0.67, min(2.0, self.size[1] / 720)))
 
     # ---- the model ---------------------------------------------------------------------------------------------
 
@@ -287,22 +298,52 @@ class App:
             if self._toast_left <= 0:
                 self.toast = None
         if self.screen is not None:
-            self.screen.update(seconds)
+            self._guard(lambda: self.screen.update(seconds))
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.VIDEORESIZE:
             self.resize((event.w, event.h))
             return
         if self.screen is not None:
-            self.screen.handle_event(event)
+            self._guard(lambda: self.screen.handle_event(event))
 
     def draw(self, surface: pygame.Surface) -> None:
         if self.screen is not None:
-            self.screen.draw(surface)
+            self._guard(lambda: self.screen.draw(surface))
+
+    # ---- the safety net --------------------------------------------------------------------------------
+
+    def _safely(self, action: Callable[[], None], what: str) -> None:
+        try:
+            action()
+        except Exception:  # noqa: BLE001 - cleanup must never stop the program
+            log.exception("Error while %s", what)
+
+    def _guard(self, action: Callable[[], None]) -> None:
+        """Run one step of the window; an unexpected error is logged and the user is returned to
+        the menu with a message instead of the program crashing."""
+        try:
+            action()
+        except Exception:  # noqa: BLE001 - last line of defence of the window
+            self.failures += 1
+            name = self.screen.name if self.screen else "?"
+            log.exception("Unexpected error on screen %s", name)
+            if self.failures > MAX_CONSECUTIVE_FAILURES:
+                self.fatal_message = ("The application keeps failing and will close. "
+                                      "Technical details are in logs/application.log.")
+                self.quit_requested = True
+                return
+            self.notify("Something went wrong, so you were returned to the menu. "
+                        "Details are in logs/application.log.", "warning")
+            if self.screen is None or self.screen.name != "menu":
+                self.go("menu")
+        else:
+            self.failures = 0
 
 
-def wrap_lines(app: App, text: str, width: int, font_name: str = "body", max_lines: int = 99) -> list[str]:
-    return wrap_text(getattr(app.fonts, font_name), text, width, max_lines)
+def clamp_size(size: tuple[int, int]) -> tuple[int, int]:
+    """Window sizes below the minimum are raised to it."""
+    return (max(MIN_WINDOW[0], int(size[0])), max(MIN_WINDOW[1], int(size[1])))
 
 
 def run_app(settings: Settings, paths: AppPaths | None = None, start: str = "menu") -> None:
@@ -322,11 +363,15 @@ def run_app(settings: Settings, paths: AppPaths | None = None, start: str = "men
             for event in pygame.event.get():
                 app.handle_event(event)
                 if event.type == pygame.VIDEORESIZE:
+                    if (event.w, event.h) != app.size:  # smaller than the minimum: make the window bigger again
+                        pygame.display.set_mode(app.size, pygame.RESIZABLE)
                     screen = pygame.display.get_surface()
             app.update(min(seconds, 0.1))
             app.draw(screen)
             pygame.display.flip()
         log.info("Application window closed")
+        if app.fatal_message:
+            print(app.fatal_message, file=sys.stderr)
     finally:
         pygame.quit()
 

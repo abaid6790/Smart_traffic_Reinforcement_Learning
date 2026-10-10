@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any, Union, get_args, get_origin, get_type_hints
 
 PROJECT_NAME = "Smart Traffic Light Control Using Reinforcement Learning"
-PROJECT_VERSION = "0.6.0"
+PROJECT_VERSION = "0.7.0"
 
 DIRECTION_NAMES: tuple[str, ...] = ("north", "south", "east", "west")
 PHASE_NAMES: tuple[str, ...] = ("NS", "EW")
@@ -37,6 +37,8 @@ SPEED_CHOICES: tuple[float, ...] = (0.5, 1.0, 2.0, 5.0, 10.0)
 THEMES: tuple[str, ...] = ("dark", "light")
 DRIVE_SIDES: tuple[str, ...] = ("right", "left")
 MAX_SEED = 2**32 - 1
+MAX_SETTINGS_FILE_BYTES = 1_000_000  # a real settings file is a few KB
+MAX_STEPS_PER_RUN = 2_000_000  # one run may not need more simulation steps than this
 
 
 class ConfigError(ValueError):
@@ -233,7 +235,7 @@ class SimulationConfig:
 
     def problems(self) -> list[str]:
         found: list[str] = []
-        _between(found, "simulation.dt", self.dt, 0, 1, " s", low_exclusive=True)
+        _between(found, "simulation.dt", self.dt, 0.01, 1, " s")
         _between(found, "simulation.duration", self.duration, 0, 86_400, " s",
                  low_exclusive=True)
         _between(found, "simulation.road_length", self.road_length, 20, 2_000, " m")
@@ -245,15 +247,15 @@ class SimulationConfig:
         _between(found, "simulation.max_speed_kmh", self.max_speed_kmh, 5, 150,
                  " km/h")
         _between(found, "simulation.speed_variation", self.speed_variation, 0, 0.5)
-        _between(found, "simulation.acceleration", self.acceleration, 0, 10,
-                 " m/s^2", low_exclusive=True)
-        _between(found, "simulation.braking", self.braking, 0, 15, " m/s^2",
-                 low_exclusive=True)
-        _between(found, "simulation.halting_speed", self.halting_speed, 0, 5,
-                 " m/s", low_exclusive=True)
+        _between(found, "simulation.acceleration", self.acceleration, 0.1, 10, " m/s^2")
+        _between(found, "simulation.braking", self.braking, 0.1, 15, " m/s^2")
+        _between(found, "simulation.halting_speed", self.halting_speed, 0.01, 5, " m/s")
         if not found:
             if self.duration < self.dt:
                 found.append("simulation.duration must be at least one time step.")
+            elif self.duration / self.dt > MAX_STEPS_PER_RUN:
+                found.append(f"simulation.duration / simulation.dt is more than {MAX_STEPS_PER_RUN:,} steps; "
+                             "use a shorter duration or a larger time step.")
             if self.road_length < 3 * (self.vehicle_length + self.min_gap):
                 found.append(
                     "simulation.road_length is too short to hold a few vehicles."
@@ -592,6 +594,9 @@ class Settings:
         """Read and validate settings from a JSON file."""
         path = Path(path)
         try:
+            if path.stat().st_size > MAX_SETTINGS_FILE_BYTES:
+                raise ConfigError([f"Settings file {path} is larger than {MAX_SETTINGS_FILE_BYTES // 1024} KB; "
+                                   "that is not a settings file."])
             text = path.read_text(encoding="utf-8")
         except FileNotFoundError:
             raise ConfigError([f"Settings file not found: {path}"]) from None
@@ -608,6 +613,9 @@ class Settings:
                 [f"Settings file {path} is not valid JSON "
                  f"(line {exc.lineno}, column {exc.colno}): {exc.msg}."]
             ) from exc
+        except (RecursionError, ValueError) as exc:  # absurdly deep nesting or huge numbers
+            raise ConfigError([f"Settings file {path} cannot be read: it is too deeply nested "
+                               "or contains an absurdly large number."]) from exc
         return cls.from_dict(data)
 
     def save(self, path: Path | str) -> None:

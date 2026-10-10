@@ -172,4 +172,7 @@ def _friendly(exc: BaseException) -> str:
     problems = getattr(exc, "problems", None)
     if problems:
         return " ".join(problems)
+    if isinstance(exc, OSError):
+        where = f" ({exc.filename})" if getattr(exc, "filename", None) else ""
+        return f"A file or folder could not be used: {exc.strerror or exc}{where}."
     return str(exc) or exc.__class__.__name__
