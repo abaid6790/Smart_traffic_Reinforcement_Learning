@@ -1,11 +1,12 @@
 """Smart Traffic Light Control Using Reinforcement Learning - entry point.
 
-Current build: Phase 7 (experiments, graphs and export).  The menu arrives in a later phase; for now
-this program checks your settings, can open the simulation window, run a text demo
-with the fixed-time controller, can train and run the Q-Learning agent
-and explains what is available.
+Current build: Phase 8 (menu and screens).  `python main.py --menu` opens the application
+with the main menu: watch the controllers, compare them side by side, train the agent, run
+experiments, view results and change settings.  Everything is also available from the
+command line.
 
     python main.py                 show an overview
+    python main.py --menu          open the application (main menu)
     python main.py --window        watch the simulation in a window
     python main.py --demo          run a simulation and print a report
     python main.py --train         train the Q-Learning agent and save the model
@@ -60,7 +61,9 @@ log = logging.getLogger("main")
 
 DEFAULT_MODEL_NAME = "q_learning_model.json"
 
-CURRENT_PHASE = "Phase 7 of 11 - experiments, graphs and export"
+CURRENT_PHASE = "Phase 8 of 11 - menu and screens"
+
+SCREEN_NAMES = ("menu", "compare", "training", "experiment", "results", "settings", "about")
 
 PYGAME_MISSING_MESSAGE = (
     "The window needs the pygame library, which is not installed.\n"
@@ -76,6 +79,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=f"%(prog)s {PROJECT_VERSION}")
     parser.add_argument("--demo", action="store_true",
                         help="run a simulation (no window) and print a text report")
+    parser.add_argument("--menu", action="store_true",
+                        help="open the application window with the main menu")
+    parser.add_argument("--screen", choices=SCREEN_NAMES, default="menu",
+                        help="with --menu: the screen to open first (default: menu)")
     parser.add_argument("--experiment", action="store_true",
                         help="compare the controllers on identical traffic; saves a report, "
                              "CSV/JSON files and graphs")
@@ -204,13 +211,14 @@ def _print_overview(settings: Settings) -> None:
     print("An academic simulation. Nothing here controls real traffic.")
     print()
     print(f"Current build: {CURRENT_PHASE}")
-    print("The menu and result screens arrive in later phases.")
+    print("Open the application with:  python main.py --menu")
     print()
     traffic, sim = settings.traffic, settings.simulation
     print(f"Active settings: scenario '{traffic.scenario}', seed {traffic.seed}, "
           f"duration {sim.duration:g} s")
     print()
     print("Try:")
+    print("  python main.py --menu                (the main menu: everything below with buttons)")
     print("  python main.py --train --train-scenarios all --episodes 700")
     print("  python main.py --experiment --experiment-scenarios all --runs 20")
     print("  python main.py --train --scenario rush_hour --episodes 300")
@@ -458,6 +466,30 @@ def _run_visual(args: argparse.Namespace, settings: Settings) -> int:
     return 0
 
 
+def _run_menu(args: argparse.Namespace, settings: Settings) -> int:
+    if args.screenshot is not None and args.screenshot.suffix.lower() != ".png":
+        raise ConfigError(["--screenshot file name must end in .png"])
+    try:
+        from ui import app as ui_app
+    except ImportError:
+        log.exception("pygame could not be imported")
+        print(PYGAME_MISSING_MESSAGE, file=sys.stderr)
+        return 1
+    paths = ui_app.AppPaths(_model_path(args), CSV_DIR, GRAPH_DIR, RESULTS_DIR, args.config or SETTINGS_FILE)
+    if args.screenshot is not None:
+        if args.screenshot.suffix.lower() != ".png":
+            raise ConfigError(["--screenshot file name must end in .png"])
+        import pygame
+        surface = ui_app.render_screen(args.screen, settings, paths)
+        args.screenshot.parent.mkdir(parents=True, exist_ok=True)
+        pygame.image.save(surface, str(args.screenshot))
+        print(f"Screenshot saved to {args.screenshot}")
+        return 0
+    log.info("Application started: first screen %s", args.screen)
+    ui_app.run_app(settings, paths, start=args.screen)
+    return 0
+
+
 def _dispatch(args: argparse.Namespace) -> int:
     if args.list_scenarios:
         _print_scenarios()
@@ -486,6 +518,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             raise ConfigError(["--env-episodes must be between 1 and 1000."])
         result = run_env_demo(settings, episodes=args.env_episodes)
         return 0 if result.safety_violations == 0 else 1
+    if args.menu or (args.screen != "menu"):
+        return _run_menu(args, settings)
     if args.window or args.screenshot is not None:
         return _run_visual(args, settings)
     _print_overview(settings)

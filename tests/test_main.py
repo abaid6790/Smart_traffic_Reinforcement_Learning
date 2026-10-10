@@ -10,6 +10,8 @@ from unittest import mock
 import main
 from utils.logging_setup import teardown_logging
 
+requires_pygame = unittest.skipIf(importlib.util.find_spec("pygame") is None, "pygame is not installed")
+
 
 class CommandLineTests(unittest.TestCase):
     """Run the real entry point, but keep logs and settings out of the project folder."""
@@ -41,7 +43,8 @@ class CommandLineTests(unittest.TestCase):
     def test_overview(self):
         code, out, _ = self.run_main()
         self.assertEqual(code, 0)
-        self.assertIn("Phase 7", out)
+        self.assertIn("Phase 8", out)
+        self.assertIn("--menu", out)
         self.assertIn("--experiment", out)
         self.assertIn("--train", out)
         self.assertIn("--window", out)
@@ -101,6 +104,7 @@ class CommandLineTests(unittest.TestCase):
         for name in ("low", "rush_hour", "uneven", "random"):
             self.assertIn(name, out)
 
+    @requires_pygame
     def test_screenshot_option_writes_a_png(self):
         target = self.dir / "shots" / "frame.png"
         code, out, err = self.run_main("--screenshot", str(target), "--screenshot-at", "30",
@@ -215,6 +219,7 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("state design", err)
 
+    @requires_pygame
     def test_screenshot_can_show_the_trained_agent(self):
         self.run_main(*self.TRAIN)
         target = self.dir / "rl.png"
@@ -257,10 +262,6 @@ class CommandLineTests(unittest.TestCase):
         self.assertIn("Demo started", log_text)
         self.assertIn("Demo finished", log_text)
 
-
-if __name__ == "__main__":
-    unittest.main()
-
     EXPERIMENT = ("--experiment", "--runs", "2", "--duration", "120", "--experiment-scenarios", "low,high",
                   "--seed", "3")
 
@@ -272,7 +273,7 @@ if __name__ == "__main__":
         for name in ("summary.md", "runs.csv", "summary.csv", "comparison.csv", "experiment.json"):
             self.assertTrue((folders[0] / name).is_file(), name)
         self.assertFalse((folders[0] / "graphs").exists())
-        self.assertNotIn("Q-Learning", (folders[0] / "runs.csv").read_text(encoding="utf-8"))
+        self.assertNotIn(",rl,", (folders[0] / "runs.csv").read_text(encoding="utf-8"))
 
     def test_experiment_with_a_trained_model_and_graphs(self):
         self.assertEqual(self.run_main(*self.TRAIN)[0], 0)
@@ -280,7 +281,7 @@ if __name__ == "__main__":
         code, out, err = self.run_main(*self.EXPERIMENT, "--results-dir", str(out_dir))
         self.assertEqual(code, 0, err)
         folder = next(out_dir.iterdir())
-        self.assertIn("Q-Learning", (folder / "runs.csv").read_text(encoding="utf-8"))
+        self.assertIn(",rl,", (folder / "runs.csv").read_text(encoding="utf-8"))
         if importlib.util.find_spec("matplotlib") is None:
             return
         self.assertTrue(list((folder / "graphs").glob("*.png")))
@@ -297,3 +298,42 @@ if __name__ == "__main__":
             code, _, err = self.run_main("--experiment", "--no-rl", *extra)
             self.assertEqual(code, 2, extra)
             self.assertTrue(err.strip(), extra)
+
+    @requires_pygame
+    def test_menu_screenshots_every_screen(self):
+        for name in main.SCREEN_NAMES:
+            target = self.dir / f"{name}.png"
+            code, out, err = self.run_main("--menu", "--screen", name, "--screenshot", str(target))
+            self.assertEqual(code, 0, err)
+            self.assertTrue(target.read_bytes().startswith(b"\x89PNG"), name)
+
+    def test_menu_screenshot_name_must_be_png(self):
+        code, _, err = self.run_main("--menu", "--screenshot", str(self.dir / "x.jpg"))
+        self.assertEqual(code, 2)
+        self.assertIn(".png", err)
+
+    @requires_pygame
+    def test_menu_opens_the_window_with_chosen_start_screen(self):
+        from ui import app as ui_app
+        with mock.patch.object(ui_app, "run_app") as run:
+            code, _, err = self.run_main("--menu", "--screen", "settings")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(run.call_args.kwargs["start"], "settings")
+        self.assertEqual(run.call_args.args[1].model_path.name, "q_learning_model.json")
+
+    def test_missing_pygame_gives_a_friendly_message_for_the_menu(self):
+        import builtins
+        real = builtins.__import__
+
+        def fake(name, *a, **k):
+            if name == "ui" or name.startswith("ui.app"):
+                raise ImportError("no pygame")
+            return real(name, *a, **k)
+        with mock.patch.object(builtins, "__import__", fake):
+            code, _, err = self.run_main("--menu")
+        self.assertEqual(code, 1)
+        self.assertIn("pygame", err)
+
+
+if __name__ == "__main__":
+    unittest.main()

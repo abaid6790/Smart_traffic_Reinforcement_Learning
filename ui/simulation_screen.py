@@ -43,7 +43,9 @@ class SimulationScreen:
         speed: float | None = None,
         paused: bool = False,
         size: tuple[int, int] | None = None,
+        quit_label: str = "Quit",
     ) -> None:
+        self.quit_label = quit_label
         self.settings = settings.validate()
         display = self.settings.display
         self.size = size or (display.window_width, display.window_height)
@@ -124,7 +126,7 @@ class SimulationScreen:
             Button("Restart", "R", "Start this run again with the same traffic", self.restart),
             Button("New traffic", "N", "Start a new run with different traffic", self.new_traffic),
             Button("Help", "H", "Show the keyboard controls", self.toggle_help),
-            Button("Quit", "Q", "Close the window", self.quit),
+            Button(self.quit_label, "Q", "Leave the simulation", self.quit),
         ]
 
     # ---- events --------------------------------------------------------------------------------------

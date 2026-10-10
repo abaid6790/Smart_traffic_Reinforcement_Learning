@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any, Union, get_args, get_origin, get_type_hints
 
 PROJECT_NAME = "Smart Traffic Light Control Using Reinforcement Learning"
-PROJECT_VERSION = "0.5.0"
+PROJECT_VERSION = "0.6.0"
 
 DIRECTION_NAMES: tuple[str, ...] = ("north", "south", "east", "west")
 PHASE_NAMES: tuple[str, ...] = ("NS", "EW")

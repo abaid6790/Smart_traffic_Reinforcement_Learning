@@ -12,7 +12,7 @@ next one starts, and each ends with something you can run and check.
 | 5 | RL environment | `reset()`, `step()`, state discretisation, reward, safety enforcement | A random agent runs full episodes with no crashes or illegal phases. **Done** |
 | 6 | Q-Learning + training | Q-table, epsilon-greedy, update rule, JSON save/load with validation, training loop with CSV log | Reward trends upward; saved model reloads correctly. **Done** |
 | 7 | Evaluation | Test mode, experiment runner (same seeds for both controllers), improvement formulas, graphs, CSV/JSON export | Real fixed-vs-RL numbers across scenarios, also against a tuned fixed-time baseline. **Key milestone. Done** (see `docs/EXPERIMENTS.md`) |
-| 8 | Menu and screens | Main menu, training, results, settings, about, side-by-side demo, one screen at a time | Every button works; none is a placeholder |
+| 8 | Menu and screens | Main menu, training, results, settings, about, side-by-side demo, one screen at a time | Every button works; none is a placeholder. **Done** (see `docs/USER_INTERFACE.md`) |
 | 9 | Reliability pass | Input validation everywhere, corrupted/missing model handling, reset confirmations | Bad input never crashes the app |
 | 10 | Tests and documentation | Remaining tests, project report, user/developer guides, RL explanation, viva questions | Docs match what the program really does |
 | 11 | Final QA | Clean-environment install, full checklist, cleanup | Everything in the acceptance list passes |

@@ -288,6 +288,16 @@ def run_experiment(
                     on_progress(done, total, f"{name}: {LABELS[key]} run {k + 1}/{runs}")
             if result.stopped_early:
                 break
+        if result.stopped_early:
+            # A fair comparison needs every controller to have driven the same seeds, so
+            # keep only the runs that all of them finished (a stop can arrive half way).
+            common = min(len(runs_done) for runs_done in collected.values())
+            for key in collected:
+                collected[key] = collected[key][:common]
+                scenario.records[key] = scenario.records.get(key, [])[:common]
+            scenario.seeds = scenario.seeds[:common]
+            if common == 0:
+                result.scenarios.remove(scenario)
         scenario.series = {key: _average_series(s) for key, s in collected.items() if s}
         if result.stopped_early:
             break

@@ -20,11 +20,13 @@ The project is being built slowly, one tested phase at a time.
 | 5 | RL environment: 18 states, KEEP/SWITCH actions, reward, safety enforced by the light | **Done** |
 | 6 | Q-Learning agent, training (CSV log, safe stop, best-policy selection), model save/load | **Done** |
 | 7 | Experiments: fixed vs tuned fixed vs RL on identical seeds, statistics, graphs, CSV/JSON/Markdown export | **Done** |
-| 8 | Menu and screens (training, testing, experiments, results, settings) | Next |
-| 9-11 | Reliability pass, docs, final QA | Planned |
+| 8 | Menu and screens: watch, compare side by side, train, experiment, results, settings, about | **Done** |
+| 9-11 | Reliability pass, docs, final QA | Next / planned |
 
 See [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md) for what each phase delivers.
-The simulation window exists (Phase 4); the menu and result screens come in Phase 8.
+Start the application with `python main.py --menu` (see [docs/USER_INTERFACE.md](docs/USER_INTERFACE.md)).
+
+![Main menu](docs/images/app_menu.png)
 
 ![The simulation window, dark theme](docs/images/window_dark.png)
 
@@ -52,6 +54,7 @@ On macOS/Linux use `source .venv/bin/activate` instead of the activate line.
 
 ```powershell
 python main.py                          # overview of this build
+python main.py --menu                   # open the application: menu, training, experiments, results, settings
 python main.py --window                 # watch the fixed-time controller in a window
 python main.py --window --scenario rush_hour --speed 5 --paused
 python main.py --screenshot docs\images\frame.png --screenshot-at 90   # save a picture, no window
@@ -207,6 +210,7 @@ smart-traffic-rl/
 │   └── tuning.py               finds the tuned fixed-time green times
 ├── agents/q_learning.py        Q-table, epsilon-greedy, update rule, model save/load
 ├── training/trainer.py         training loop, CSV log, pause/stop, best-policy selection
+├── training/workflow.py        training as a whole job (used by the training screen)
 ├── environment/
 │   ├── enums.py                Direction, Phase, signal colours
 │   ├── vehicle.py              one vehicle: motion, waiting time, stops
@@ -219,7 +223,12 @@ smart-traffic-rl/
 │   ├── runner.py               one full episode: simulator + controller + metrics
 │   ├── headless_demo.py        text report used by --demo
 │   └── env_demo.py             random-agent demo used by --env-demo
-├── ui/                         the window (pygame is imported only when used)
+├── ui/                         the windows (pygame is imported only when used)
+│   ├── app.py  widgets.py      application, screen base class; progress bar, chart, table, dialog
+│   ├── jobs.py                 background thread for training / experiments (plain Python)
+│   ├── settings_form.py        settings screen logic (plain Python)
+│   ├── results_data.py         reads saved experiments (plain Python)
+│   ├── screens/                menu, watch, compare, training, experiment, results, settings, about
 │   ├── theme.py  geometry.py   colours; road layout and drive side (plain Python)
 │   ├── snapshot.py session.py  frozen states, interpolation; play/pause/speed logic
 │   ├── components.py           fonts, text wrapping, buttons
@@ -233,7 +242,7 @@ smart-traffic-rl/
 │   └── formatting.py           metrics and experiments as readable text
 ├── utils/                      safe paths, logging
 ├── tests/                      automated tests (unittest)
-├── docs/                       DEVELOPMENT_PLAN.md, METRICS.md, RL_ENVIRONMENT.md, Q_LEARNING.md, EXPERIMENTS.md, images/
+├── docs/                       DEVELOPMENT_PLAN.md, METRICS.md, RL_ENVIRONMENT.md, Q_LEARNING.md, EXPERIMENTS.md, USER_INTERFACE.md, images/
 ├── models/  results/  logs/    created and used in later phases
 └── LICENSE  requirements.txt  .gitignore
 ```
@@ -244,7 +253,7 @@ smart-traffic-rl/
 python -m unittest discover -s tests -t .
 ```
 
-433 tests currently pass (the window tests run without a display). Besides unit tests of each class, the simulator tests run
+520 tests currently pass (the window tests run without a display). Besides unit tests of each class, the simulator tests run
 whole simulations in every scenario, with and without aggressive light-switch
 requests, and verify on every step that: no vehicle runs a red light, no vehicles
 overlap, no conflicting traffic is in the crossing, no vehicle gets stuck, vehicles
@@ -274,6 +283,11 @@ training environment, for several decision intervals.
 Phase 7 tests check the statistics against hand calculation, identical traffic across controllers, that tuning
 uses separate seeds, the reward grid, file contents against the in-memory results, real PNG graphs, and the
 command line (`--experiment` with and without a model, bad input).
+
+Phase 8 tests click every button of every screen (also with the keyboard), check that training and experiments really
+run, pause, stop and save from the window, that leaving asks first, that invalid settings can never be saved, that both
+sides of the comparison see identical traffic and give the same numbers as separate runs, and that every screen draws
+without overlapping buttons at several window sizes and in both themes.
 
 The checks were themselves verified by deliberately injecting bugs (ignoring signals,
 removing following distance, wrong green times, wrong averages, flipped improvement

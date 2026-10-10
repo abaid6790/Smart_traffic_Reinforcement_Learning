@@ -172,9 +172,9 @@ def markdown_report(result: ExperimentResult) -> str:
               "excludes zero. See docs/EXPERIMENTS.md.", ""]
     if result.model:
         m = result.model
-        lines.append(f"Q-Learning model: trained {m['episodes_trained']} episodes on "
-                     f"{', '.join(m['trained_on']) if m['trained_on'] else 'unknown scenarios'}"
-                     f"{'' if m['best_episode'] is None else f' (best policy from episode {m['best_episode']})'}.")
+        scenarios_text = ", ".join(m["trained_on"]) if m["trained_on"] else "unknown scenarios"
+        best_text = "" if m["best_episode"] is None else f" (best policy from episode {m['best_episode']})"
+        lines.append(f"Q-Learning model: trained {m['episodes_trained']} episodes on {scenarios_text}{best_text}.")
         lines.append("")
     for scenario in result.scenarios:
         lines += _scenario_markdown(scenario)

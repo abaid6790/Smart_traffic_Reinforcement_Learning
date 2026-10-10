@@ -36,6 +36,33 @@ def varied_agent(settings, seed=1):
     return agent
 
 
+class StoppedExperimentTests(unittest.TestCase):
+    def run_stopped(self, calls):
+        settings = settings_for(60.0, "low", 5)
+        counter = {"n": 0}
+
+        def should_stop():
+            counter["n"] += 1
+            return counter["n"] > calls
+        return run_experiment(settings, ["low", "high"], runs=4, agent=varied_agent(settings),
+                              should_stop=should_stop)
+
+    def test_a_partial_experiment_keeps_only_runs_all_controllers_finished(self):
+        result = self.run_stopped(4 + 4 + 2)  # fixed 4, tuned 4, agent 2 of 4
+        self.assertTrue(result.stopped_early)
+        self.assertEqual([s.scenario for s in result.scenarios], ["low"])
+        scenario = result.scenarios[0]
+        self.assertEqual({k: len(v) for k, v in scenario.records.items()}, {FIXED: 2, TUNED: 2, RL: 2})
+        self.assertEqual(len(scenario.seeds), 2)
+        self.assertTrue(scenario.traffic_was_identical())
+        scenario.compare(RL, FIXED, "average_waiting_time_all")  # does not raise: equal lengths
+
+    def test_stopping_before_all_controllers_ran_leaves_no_scenario(self):
+        result = self.run_stopped(5)
+        self.assertTrue(result.stopped_early)
+        self.assertEqual(result.scenarios, [])
+
+
 class RewardMeterTests(unittest.TestCase):
     def test_total_reward_matches_an_independent_calculation(self):
         settings = settings_for(duration=100.0, switch_penalty=3.0, queue_limit=4, queue_penalty=0.5)
@@ -215,12 +242,13 @@ class ExperimentTests(unittest.TestCase):
 
         def stop():
             counter["n"] += 1
-            return counter["n"] > 4
+            return counter["n"] > 7  # fixed 5 runs, agent 2 runs, then stop
 
         partial = run_experiment(self.settings, runs=5, agent=self.agent, tune=False, should_stop=stop)
         self.assertTrue(partial.stopped_early)
-        self.assertEqual(len(partial.scenarios[0].records[FIXED]), 4)
-        self.assertNotIn(RL, [k for k, v in partial.scenarios[0].records.items() if v])
+        # only runs that both controllers finished are kept
+        self.assertEqual(len(partial.scenarios[0].records[FIXED]), 2)
+        self.assertEqual(len(partial.scenarios[0].records[RL]), 2)
 
     def test_bad_arguments(self):
         for kwargs in ({"runs": 0}, {"runs": -1}, {"runs": 2.5}, {"runs": True}, {"runs": 1000},
