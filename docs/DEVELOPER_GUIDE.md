@@ -141,7 +141,7 @@ python -m pyflakes .          # optional: unused imports and names
 | Evaluation | `test_stats`, `test_experiment`, `test_export` |
 | Window and application | `test_ui_logic`, `test_ui_screen`, `test_phase8_logic`, `test_app_screens` |
 | Command line | `test_main` |
-| Reliability and conventions | `test_reliability`, `test_remaining_paths`, `test_python_compat`, `test_documentation` |
+| Reliability and conventions | `test_reliability`, `test_remaining_paths`, `test_policies`, `test_python_compat`, `test_documentation` |
 
 Window tests run without a display (`SDL_VIDEODRIVER=dummy` is set by the tests) and are skipped if pygame is not
 installed. A full run takes about 1.5 minutes.

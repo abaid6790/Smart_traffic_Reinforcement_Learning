@@ -19,8 +19,8 @@ delivered files, in a fresh folder with a fresh virtual environment created from
 | `--menu --screen X --screenshot` for all 7 screens, and the simulation window | checked: images produced and looked at |
 | `--write-settings`, then a run that picks the file up | checked |
 | A settings file with a wrong value | checked: plain message, exit code 2 |
-| Full automated suite in the clean venv | checked: 578 tests OK |
-| Full suite on Python 3.11 and 3.13 | checked: 578 tests OK on both |
+| Full automated suite in the clean venv | checked: 589 tests OK |
+| Full suite on Python 3.11 and 3.13 | checked: 589 tests OK on both |
 
 ## Project rules
 

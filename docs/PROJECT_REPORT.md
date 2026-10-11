@@ -18,7 +18,7 @@ lowered the average waiting time by 15 % to 37 % compared with the default timer
 worse in light traffic. Compared with the tuned timer it was clearly better only in rush hour (3.8 %), not different in four
 scenarios and worse in light and medium traffic. The main conclusion is therefore modest and honest: the agent learned a
 sensible rule (give green to the busier road) and clearly beats a poorly set timer, but does not beat a well-tuned timer
-in most conditions. The simulation, the learning code, the experiment pipeline, a desktop application and 578 automated
+in most conditions. The simulation, the learning code, the experiment pipeline, a desktop application and 589 automated
 tests are all part of the delivered software.
 
 ## 1. Introduction
@@ -218,7 +218,7 @@ scenarios with the original model (identical results).
 |---|---|
 | Language and libraries | Python 3.11+, pygame (window), matplotlib (graphs), otherwise the standard library |
 | Source size | about 8,800 lines in 60 modules, plus about 6,200 lines of tests |
-| Automated tests | 578, passing on Python 3.11 and 3.13 |
+| Automated tests | 589, passing on Python 3.11 and 3.13 |
 | Documentation | README and the guides in `docs/` |
 | License | MIT |
 

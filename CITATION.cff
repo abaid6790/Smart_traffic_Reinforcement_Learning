@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Smart Traffic Light Control Using Reinforcement Learning"
+type: software
+version: 1.0.0
+date-released: 2026-10-11
+license: MIT
+abstract: >-
+  An educational Python simulation of a four-way intersection in which a tabular Q-Learning agent learns to control the
+  traffic light and is compared, on identical seeded traffic, with a default and a tuned fixed-time controller.
+keywords:
+  - reinforcement learning
+  - Q-Learning
+  - traffic light control
+  - simulation
+authors:
+  - family-names: "Name"
+    given-names: "Your"
