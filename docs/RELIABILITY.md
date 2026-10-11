@@ -23,6 +23,8 @@ This phase was done by attacking the program (random and hostile input) and fixi
 * A graph failure (matplotlib problem) made training or an experiment look failed after the data was saved -> the data stays, a note explains the graphs are missing.
 * Stopping an experiment halfway left controllers with different run counts -> only runs finished by all controllers are kept.
 * Raw file errors were shown to the user -> turned into plain sentences.
+* (Phase 10, found by the coverage run) A model file that existed but could not be read showed as "no model yet", inviting the user to train over it -> it is now reported as damaged/unreadable.
+* (Phase 10) The "3 failures in a row" safety net was reset by any step that succeeded, so a screen that always failed to draw never made the app close -> failures now count per frame, and a frame only counts as clean if nothing failed in it.
 
 ## Behaviour guarantees
 

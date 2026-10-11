@@ -43,7 +43,7 @@ class CommandLineTests(unittest.TestCase):
     def test_overview(self):
         code, out, _ = self.run_main()
         self.assertEqual(code, 0)
-        self.assertIn("Phase 8", out)
+        self.assertIn("Phase 11", out)
         self.assertIn("--menu", out)
         self.assertIn("--experiment", out)
         self.assertIn("--train", out)

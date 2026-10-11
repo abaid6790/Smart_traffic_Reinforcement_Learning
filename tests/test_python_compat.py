@@ -14,9 +14,11 @@ class SyntaxCompatibilityTests(unittest.TestCase):
         import io
         import tokenize
         problems = []
-        for path in sorted(ROOT.rglob("*.py")):
-            if ".venv" in path.parts:
-                continue
+        # only the project's own code; a virtual environment inside the folder (whatever its name) is not ours
+        own = [ROOT / "main.py"] + [p for d in ("agents", "config", "controllers", "environment", "evaluation",
+                                                 "simulation", "training", "ui", "utils", "tests")
+                                    for p in (ROOT / d).rglob("*.py")]
+        for path in sorted(own):
             source = path.read_text(encoding="utf-8")
             ast.parse(source, str(path))
             try:

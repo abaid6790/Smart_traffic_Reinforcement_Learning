@@ -1,7 +1,7 @@
 """Plays the RL environment with a *random* agent, to show that it works.
 
 The random agent is not intelligent and is not a baseline for the comparison; it
-only proves the environment can run full episodes safely.  Learning starts in Phase 6.
+only proves the environment can run full episodes safely.  The learning agent is in agents/q_learning.py.
 """
 
 from __future__ import annotations

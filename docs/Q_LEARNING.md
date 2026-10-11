@@ -57,8 +57,8 @@ conflicts, q-table change, validation waiting time). An existing model is never
 overwritten without `--force` or `--continue-training`. Ctrl+C stops safely and still saves.
 
 `training/trainer.py` can also be paused, resumed and stopped from another thread
-(`pause()`, `resume()`, `stop()`); a stop takes effect after the current episode. The Phase 8
-training screen will use these.
+(`pause()`, `resume()`, `stop()`); a stop takes effect after the current episode. The training
+screen of the application uses these.
 
 ### Seeds
 
@@ -106,15 +106,15 @@ default fixed-time controller (30 s / 30 s), average waiting time of all vehicle
 | medium, high, balanced, uneven, random (one model trained on all scenarios, 400 episodes, 2 seeds) | 11-12 s | 7-8 s (about +31 to +39 %) |
 | low (same models) | 10-11 s | 11 s (**3-10 % worse**) |
 
-Important caveats, which Phase 7 must handle:
+Important caveats (all handled in Phase 7):
 
 1. **The default 30 s baseline is weak for this traffic.** Simply shortening the fixed greens helps
    a lot: in rush hour 15-20 s gives about 12.3 s, and in medium traffic 12 s gives 6.8 s (versus
    10.5 s at 30 s). Much of the agent's gain over 30/30 is therefore the *shorter cycle* it learned,
-   not clever adaptation. Phase 7 will therefore also compare against a **tuned** fixed-time
-   controller (best green time found on separate seeds), and report both.
-2. These are 2-8 training seeds and 10 test seeds, a sanity check, not a result. Phase 7 will use
-   10-20 runs per scenario with confidence intervals.
-3. In low traffic the agent is slightly worse than fixed-time; this will be reported as it is.
+   not clever adaptation. Phase 7 therefore also compares against a **tuned** fixed-time
+   controller (best green time found on separate seeds), and reports both.
+2. These were 2-8 training seeds and 10 test seeds, a sanity check, not a result. Phase 7 uses
+   20 runs per scenario with confidence intervals (see EXPERIMENTS.md).
+3. In low traffic the agent is slightly worse than fixed-time; this is reported as it is in the final experiments.
 4. The best policy was often found early (episode 20-120), which suggests the 18-state design
    limits what can be learned: it cannot see how long the green has lasted.

@@ -1,6 +1,6 @@
 """Smart Traffic Light Control Using Reinforcement Learning - entry point.
 
-Current build: Phase 8 (menu and screens).  `python main.py --menu` opens the application
+Current build: Phase 11 (final QA).  `python main.py --menu` opens the application
 with the main menu: watch the controllers, compare them side by side, train the agent, run
 experiments, view results and change settings.  Everything is also available from the
 command line.
@@ -61,7 +61,7 @@ log = logging.getLogger("main")
 
 DEFAULT_MODEL_NAME = "q_learning_model.json"
 
-CURRENT_PHASE = "Phase 8 of 11 - menu and screens"
+CURRENT_PHASE = "Phase 11 of 11 - final QA (complete)"
 
 SCREEN_NAMES = ("menu", "compare", "training", "experiment", "results", "settings", "about")
 

@@ -56,8 +56,6 @@ def tune_fixed_time(
     pairs = [(a, b) for a in values for b in values]
     if start not in pairs:
         pairs.insert(0, start)
-    if not pairs:
-        raise ValueError("No candidate green time lies between the minimum and maximum green.")
 
     seed0 = base.traffic.seed
     scores: dict[tuple[float, float], float] = {}

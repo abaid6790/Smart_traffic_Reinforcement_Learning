@@ -4,7 +4,7 @@ The light is a small state machine:
 
     GREEN (one phase) -> YELLOW -> ALL_RED -> GREEN (the other phase) -> ...
 
-Whoever controls the light (a fixed timer, or later the learning agent) can only
+Whoever controls the light (a fixed timer or the learning agent) can only
 *ask* for a switch.  The light enforces the rules itself:
 
 * a request is ignored until the minimum green time has passed;

@@ -3,7 +3,7 @@
 A controller looks at the simulator and may *ask* the light to change.  It never
 touches vehicles or timers directly, and the light refuses any request that would
 break a safety rule (see ``environment.traffic_light``).  Because every controller
-(fixed-time now, Q-Learning later) works through this one small interface, they
+(fixed-time and Q-Learning) works through this one small interface, they
 can be run, measured and compared in exactly the same way.
 """
 

@@ -9,7 +9,7 @@ Settings can be changed in three ways:
 
 * in code:     ``settings.with_changes("traffic", seed=7)``
 * in a file:   ``python main.py --write-settings`` creates an editable JSON file
-* in the UI:   (added in a later phase; it will use the same validation)
+* in the UI:   the Settings screen of ``python main.py --menu`` (same validation)
 
 Every value is validated.  All problems are collected and reported together in
 one :class:`ConfigError`, so a user can fix everything in a single pass.
@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any, Union, get_args, get_origin, get_type_hints
 
 PROJECT_NAME = "Smart Traffic Light Control Using Reinforcement Learning"
-PROJECT_VERSION = "0.7.0"
+PROJECT_VERSION = "1.0.0"
 
 DIRECTION_NAMES: tuple[str, ...] = ("north", "south", "east", "west")
 PHASE_NAMES: tuple[str, ...] = ("NS", "EW")
@@ -370,7 +370,7 @@ class TrafficConfig:
 
 @dataclass
 class RLConfig:
-    """Q-Learning and RL-environment parameters (Phase 5 onwards)."""
+    """Q-Learning and RL-environment parameters."""
 
     learning_rate: float = 0.1
     discount_factor: float = 0.9
@@ -423,7 +423,7 @@ class RLConfig:
 
 @dataclass
 class DisplayConfig:
-    """Window and display options (used from Phase 4 onwards)."""
+    """Window and display options (used by the window and the menu)."""
 
     window_width: int = 1280
     window_height: int = 720

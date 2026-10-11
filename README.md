@@ -1,317 +1,755 @@
-# Smart Traffic Light Control Using Reinforcement Learning
+# 🚦 Smart Traffic Light Control Using Reinforcement Learning
 
-An academic semester project: a simulated four-way intersection where a
-reinforcement-learning agent (tabular Q-Learning) will learn to control the traffic
-light and be compared against a traditional fixed-time controller.
+<div align="center">
 
-> **Disclaimer:** this is an educational simulation. It must never be connected to
-> real traffic-control equipment.
+<a href="https://github.com/">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=26&duration=2800&pause=900&color=36BCF7&center=true&vCenter=true&width=800&height=65&lines=Smarter+Traffic.+Intelligent+Decisions.;Reinforcement+Learning+in+Action.;Simulate.+Train.+Evaluate.+Improve." alt="Animated project title" />
+</a>
 
-## Project status
+**An intelligent traffic simulation powered by Tabular Q-Learning**
 
-The project is being built slowly, one tested phase at a time.
+Explore how reinforcement learning makes traffic-control decisions, visualize vehicle movement, and compare a learned policy against traditional fixed-time traffic signals under identical simulated conditions.
 
-| Phase | What | Status |
-|------:|------|--------|
-| 1 | Project setup: validated settings, logging, safe paths, entry point | **Done** |
-| 2 | Headless simulation: vehicles, roads, traffic light with safety rules, seeded traffic | **Done** |
-| 3 | Fixed-time controller and performance metrics | **Done** |
-| 4 | Pygame visualisation: watch the simulation, speed control, pause/step | **Done** |
-| 5 | RL environment: 18 states, KEEP/SWITCH actions, reward, safety enforced by the light | **Done** |
-| 6 | Q-Learning agent, training (CSV log, safe stop, best-policy selection), model save/load | **Done** |
-| 7 | Experiments: fixed vs tuned fixed vs RL on identical seeds, statistics, graphs, CSV/JSON/Markdown export | **Done** |
-| 8 | Menu and screens: watch, compare side by side, train, experiment, results, settings, about | **Done** |
-| 9 | Reliability pass: input limits, damaged-file handling, error safety net, delete confirmations ([docs/RELIABILITY.md](docs/RELIABILITY.md)) | **Done** |
-| 10-11 | Tests and documentation, final QA | Next / planned |
+<br>
 
-See [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md) for what each phase delivers.
-Start the application with `python main.py --menu` (see [docs/USER_INTERFACE.md](docs/USER_INTERFACE.md)).
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Reinforcement Learning](https://img.shields.io/badge/AI-Reinforcement%20Learning-8B5CF6?style=for-the-badge)
+![Q-Learning](https://img.shields.io/badge/Algorithm-Q--Learning-0EA5E9?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-578%20passing-22C55E?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)
 
-![Main menu](docs/images/app_menu.png)
+<br>
 
-![The simulation window, dark theme](docs/images/window_dark.png)
+**[Quick Start](#-quick-start) · [Features](#-key-features) · [Experiments](#-experimental-results) · [Documentation](#-documentation)**
 
-![The simulation window, light theme](docs/images/window_light.png)
+</div>
 
-## Requirements
+---
 
-* Python 3.11 or newer (developed and tested on Python 3.13)
-* `pygame` (2.5.2 or newer) for the window and `matplotlib` for the graphs. The simulation, metrics,
-  `--demo`, training, experiments and the settings need only the standard library; without
-  matplotlib only the PNG graphs are skipped.
+## 🚦 Project Overview
 
-## Running (Windows PowerShell)
+Traditional traffic lights use predefined timings regardless of how many vehicles are waiting. This project explores whether a reinforcement-learning agent can make better switching decisions by observing traffic conditions and learning from rewards.
+
+The application simulates a four-way intersection with two non-conflicting traffic phases:
+
+- **North–South:** vehicles travelling from the north and south approaches.
+- **East–West:** vehicles travelling from the east and west approaches.
+
+A tabular Q-Learning agent observes traffic levels, chooses whether to keep the current phase or request a switch, and learns a policy through repeated simulation.
+
+The learned policy is evaluated against both the default fixed-time controller and a tuned fixed-time controller. All controllers receive identical seeded traffic during each paired experiment.
+
+> **⚠️ Educational simulation only**
+>
+> This project is designed exclusively for academic learning, experimentation, and simulation. It must never be connected to real traffic signals, road infrastructure, or live traffic-control equipment.
+
+## 🎬 See the Simulation
+
+<div align="center">
+
+### Main Application
+
+<img src="docs/images/app_menu.png" alt="Smart Traffic RL application main menu" width="85%">
+
+*An interactive application for simulation, training, experiments, results, and settings.*
+
+### Traffic Simulation — Dark Theme
+
+<img src="docs/images/window_dark.png" alt="Four-way traffic intersection simulation in dark mode" width="85%">
+
+### Traffic Simulation — Light Theme
+
+<img src="docs/images/window_light.png" alt="Four-way traffic intersection simulation in light mode" width="85%">
+
+</div>
+
+The interface lets you observe vehicles, traffic signals, queues, simulation time, and live performance statistics while controlling playback speed.
+
+## ✨ Key Features
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🧠 Reinforcement Learning
+
+- Tabular Q-Learning agent
+- 18 discrete environment states
+- Two actions: `KEEP` and `SWITCH`
+- Epsilon-greedy exploration
+- Configurable reward parameters
+- Model saving and loading
+- Best-policy selection using separate validation traffic
+
+</td>
+<td width="50%" valign="top">
+
+### 🚘 Traffic Simulation
+
+- Four-way intersection
+- Seeded and reproducible traffic
+- Seven traffic scenarios
+- Smooth acceleration and braking
+- Vehicle spacing and queue management
+- Yellow and all-red transitions
+- Minimum and maximum green constraints
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 📊 Experiments & Analytics
+
+- Default fixed-time baseline
+- Tuned fixed-time baseline
+- Trained reinforcement-learning controller
+- Paired comparisons on identical traffic
+- Mean performance and 95% confidence intervals
+- CSV, JSON, Markdown, and PNG exports
+
+</td>
+<td width="50%" valign="top">
+
+### 🎮 Interactive Desktop UI
+
+- Main menu and simulation viewer
+- Side-by-side controller comparison
+- Training and experiment screens
+- Results browser
+- Settings editor
+- Dark and light themes
+- Pause, resume, step, replay, and speed controls
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🛡️ Safety & Reliability
+
+- Signal transitions enforced by the simulator
+- Conflicting green phases prevented
+- Validated configuration values
+- Defensive model-file loading
+- Safe training interruption
+- Clear error messages and logging
+
+</td>
+<td width="50%" valign="top">
+
+### 🧪 Testing & Documentation
+
+- 578 passing automated tests
+- Deterministic simulation checks
+- Controller fairness checks
+- Interface and rendering tests
+- Documentation consistency tests
+- Developer guide, project report, and viva preparation
+
+</td>
+</tr>
+</table>
+
+## 📈 Experimental Results
+
+The project evaluates controllers using the same traffic seeds to make the comparison fair.
+
+### Reported findings
+
+Based on the project's existing results from **20 runs across seven scenarios**, using average waiting time for all vehicles:
+
+- Q-Learning reduces average waiting time by **15–37% compared with the default 30/30-second fixed-time controller in six of seven scenarios**.
+- A tuned fixed-time controller performs approximately as well as Q-Learning in most scenarios.
+- Q-Learning performs better than the tuned fixed-time controller in rush hour, with a reported improvement of **3.8%**.
+- The agent shows no clear difference in four scenarios and performs worse in low- and medium-traffic scenarios.
+
+These results demonstrate why a learned controller should be compared with a tuned baseline, rather than only with a basic timer.
+
+<div align="center">
+
+<img src="docs/images/experiment_waiting_time.png" alt="Average waiting time comparison across traffic scenarios" width="90%">
+
+*Average waiting time by traffic scenario. See the generated experiment report for numerical results.*
+
+</div>
+
+### What the experiment measures
+
+| Metric | What it tells us |
+|---|---|
+| Average waiting time | Time vehicles spend waiting, including vehicles still stuck |
+| Average travel time | Time required for vehicles to complete their journeys |
+| Throughput | Number of vehicles served |
+| Queue length | Number of vehicles waiting for passage |
+| Number of stops | How often vehicles come to a stop |
+| Improvement percentage | Relative change against a selected baseline |
+| Confidence interval | Uncertainty around the estimated mean performance |
+
+Both served-vehicle waiting time and all-vehicle waiting time are reported. This prevents a controller from appearing successful simply because it leaves difficult-to-serve vehicles behind.
+
+> Results are specific to this simulator, its reward function, traffic-generation model, and tested scenarios. They do not establish that reinforcement learning will outperform conventional traffic control in real-world deployments.
+
+## 🧰 Technology Stack
+
+| Technology | Purpose |
+|---|---|
+| Python 3.11+ | Core application and simulation |
+| Pygame | Interactive desktop visualization |
+| Matplotlib | Experiment graphs |
+| Tabular Q-Learning | Reinforcement-learning algorithm |
+| Python standard library | Simulation, configuration, logging, statistics, and testing |
+| `unittest` | Automated testing |
+| JSON | Settings and trained-model storage |
+| CSV | Training logs and experiment data |
+| Markdown | Human-readable reports and documentation |
+
+The project does not require a GPU or a large machine-learning framework. The Q-table contains only **18 states × 2 actions = 36 state-action values**, making it suitable for a lightweight academic project.
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.11 or newer
+- Git, if cloning the repository
+- Pygame for the graphical interface
+- Matplotlib for PNG experiment graphs
+
+The headless simulation, metrics, training, experiments, and settings functionality use the Python standard library. Without Matplotlib, graph images are skipped.
+
+### 1. Clone the repository
+
+```powershell
+git clone <YOUR_REPOSITORY_URL>
+cd smart-traffic-rl
+```
+
+Replace `<YOUR_REPOSITORY_URL>` with the actual Git repository URL.
+
+Alternatively, download the repository ZIP and extract it into a folder.
+
+### 2. Create a virtual environment
 
 ```powershell
 python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-python main.py
 ```
 
-On macOS/Linux use `source .venv/bin/activate` instead of the activate line.
-
-### Useful commands
+### 3. Activate the environment
 
 ```powershell
-python main.py                          # overview of this build
-python main.py --menu                   # open the application: menu, training, experiments, results, settings
-python main.py --window                 # watch the fixed-time controller in a window
-python main.py --window --scenario rush_hour --speed 5 --paused
-python main.py --screenshot docs\images\frame.png --screenshot-at 90   # save a picture, no window
-python main.py --demo                   # fixed-time controller: run, print report + metrics
-python main.py --demo --scenario rush_hour --duration 300 --seed 7
-python main.py --demo --ns-green 20 --ew-green 40   # change the baseline's green times
-python main.py --train --scenario rush_hour --episodes 300   # train the Q-Learning agent, save models\q_learning_model.json
-python main.py --demo --controller rl --scenario rush_hour   # run the trained agent
-python main.py --window --controller rl                      # watch the trained agent
-python main.py --model-info                                  # what the model learned
-python main.py --experiment --experiment-scenarios all --runs 20   # fixed vs tuned fixed vs RL, writes results\experiment_...
-python main.py --experiment --no-rl                          # fixed-time controllers only (no model needed)
-python main.py --env-demo --duration 300     # RL environment played by a random agent (no learning)
-python main.py --list-scenarios         # show the traffic scenarios
-python main.py --write-settings         # create config\user_settings.json to edit
-python -m unittest discover -s tests -t .   # run the automated tests
+.venv\Scripts\Activate.ps1
 ```
 
-The same `--seed` always produces exactly the same traffic.
+If PowerShell blocks activation, use the following command in the current terminal session, if permitted by your system policy:
 
-## The simulation window
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\Activate.ps1
+```
 
-`python main.py --window` opens the intersection with cars, signals and a side panel
-showing the controller, scenario, seed, clock, live statistics and buttons. Every button
-has a keyboard key, and `H` shows them in the window.
+### 4. Install dependencies
 
-| Key | Action |
-|-----|--------|
-| Space | pause / resume (Replay when the run has finished) |
-| S or Right | run one step (pauses first) |
-| + / - or Up / Down | faster / slower |
-| 1 - 5 | speed 0.5x, 1x, 2x, 5x, 10x |
-| R | restart the same traffic |
-| N | new traffic (next seed) |
-| T / D | hide-show statistics / debug information |
-| H | help |
-| Esc or Q | close help, then quit |
+```powershell
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-What you see is what the simulator computed, nothing is faked for the picture:
+### 5. Launch the application
 
-* Vehicles are **blue when moving and orange when waiting** at a stop line. A legend
-  explains it, and every signal head also spells out RED, YELLOW or GREEN, so the
-  display never relies on colour alone.
-* Motion is smoothed between simulation steps, but the signals drawn are the ones the
-  vehicles actually obeyed. Watching never changes the results: a watched run gives
-  exactly the same metrics as a headless run (there is a test for it).
-* When a run ends a results card shows the metrics; Replay or New traffic starts again.
-* Display settings (`display` section): `theme` (dark/light), `window_width`/`height`,
-  `fps`, `simulation_speed`, `drive_on` (`right` or `left`, mirrors the lanes),
-  `view_range` (metres of road shown, 30-300), `show_statistics`, `show_debug`.
+```powershell
+python main.py --menu
+```
 
-If pygame is missing, `--window` explains how to install it instead of crashing.
+You can also inspect the available command-line options:
 
-## The RL environment
+```powershell
+python main.py --help
+```
 
-`environment/rl_env.py` exposes the simulator as `reset()`, `step(action)`, `get_state()`
-and `calculate_reward()`. The state is 18 values (NS traffic level x EW traffic level x
-current phase), the actions are KEEP and SWITCH, and the reward is the fall in waiting
-vehicles minus a switch penalty and an excess-queue penalty. The agent can only *request*
-a switch, so it cannot break a safety rule. Exact definitions, thresholds and the reward
-formula are in [docs/RL_ENVIRONMENT.md](docs/RL_ENVIRONMENT.md); all numbers can be changed
-in the `rl` settings section. Nothing learns yet: `--env-demo` uses a random agent only
-to show that full episodes run safely.
+## 🎮 Useful Commands
 
-## The Q-Learning agent
+Run these commands from the project root with the virtual environment activated.
 
-`python main.py --train` plays many simulated episodes and learns a table of 18 states x
-2 actions (the update rule, epsilon-greedy exploration and the model file are explained in
-[docs/Q_LEARNING.md](docs/Q_LEARNING.md)). Training writes a per-episode CSV log, can be
-stopped safely with Ctrl+C, never overwrites a model by accident, and keeps the *best*
-policy it found (checked on separate validation traffic) rather than just the last one,
-because the greedy policy of a table that is still learning swings between good and bad.
-A trained model runs through exactly the same pipeline as the fixed-time controller
-(`--demo/--window/--screenshot` with `--controller rl`), with exploration off.
+<details>
+<summary><strong>🖥️ Launch and control the simulation</strong></summary>
 
-Early sanity checks are in `docs/Q_LEARNING.md`.
+```powershell
+# Show the command-line overview
+python main.py
 
-## Experiments and results
+# Open the complete application
+python main.py --menu
 
-`python main.py --experiment` runs the default fixed-time controller, a *tuned* fixed-time controller
-and the trained agent on identical traffic (same seeds) and reports means with 95 % confidence
-intervals and a paired seed-by-seed verdict. It writes `summary.md`, CSV files, JSON and graphs to
-`results/experiment_<time>_<scenarios>/`. Method, seeds and files: [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md).
+# Watch the fixed-time controller
+python main.py --window
 
-Real results (20 runs, 7 scenarios, average waiting time of all vehicles): the agent beats the default
-30/30 timer by 15-37 % in six of seven scenarios, but a tuned fixed-time controller is about as good:
-Q-Learning is clearly better only in rush hour (+3.8 %), no different in four scenarios and worse in low and
-medium traffic. These are the real numbers, not adjusted ones.
+# Start a rush-hour simulation at 5x speed, initially paused
+python main.py --window --scenario rush_hour --speed 5 --paused
 
-![Average waiting time per scenario](docs/images/experiment_waiting_time.png)
+# Generate a screenshot without opening a window
+python main.py --screenshot docs\images\frame.png --screenshot-at 90
 
-## Changing settings (no code editing needed)
+# List available traffic scenarios
+python main.py --list-scenarios
+```
 
-Run `python main.py --write-settings`, then edit `config/user_settings.json`. Every
-setting is documented in `config/settings.py` and is validated when loaded: a typo, a
-wrong type or an out-of-range value gives a plain-English list of everything that
-needs fixing, instead of a crash. You only need to list the values you want to change.
+</details>
 
-Example `user_settings.json`:
+<details>
+<summary><strong>🧠 Train and inspect the Q-Learning agent</strong></summary>
+
+```powershell
+# Train the agent for 300 episodes
+python main.py --train --scenario rush_hour --episodes 300
+
+# Inspect the saved policy
+python main.py --model-info
+
+# Run the trained agent in headless mode
+python main.py --demo --controller rl --scenario rush_hour
+
+# Watch the trained agent
+python main.py --window --controller rl
+
+# Demonstrate the RL environment using a random agent
+python main.py --env-demo --duration 300
+```
+
+Training saves the learned model to `models/q_learning_model.json`. The training workflow validates candidate policies on separate traffic seeds and retains the best validated policy it finds.
+
+</details>
+
+<details>
+<summary><strong>📊 Run experiments and compare controllers</strong></summary>
+
+```powershell
+# Compare fixed-time, tuned fixed-time, and RL controllers
+python main.py --experiment --experiment-scenarios all --runs 20
+
+# Run experiments without a trained RL model
+python main.py --experiment --no-rl
+
+# Run a standard fixed-time demonstration
+python main.py --demo
+
+# Run a seeded rush-hour demonstration
+python main.py --demo --scenario rush_hour --duration 300 --seed 7
+
+# Change the fixed-time baseline's green durations
+python main.py --demo --ns-green 20 --ew-green 40
+```
+
+Experiment outputs are saved under a timestamped directory in `results/`. The generated files include summaries, raw data, statistics, and graphs when Matplotlib is available.
+
+</details>
+
+<details>
+<summary><strong>⚙️ Configure the application</strong></summary>
+
+```powershell
+# Create the user settings file
+python main.py --write-settings
+```
+
+Edit `config/user_settings.json` to override the settings you want to change.
+
+Example:
 
 ```json
 {
-  "traffic":    { "scenario": "rush_hour", "seed": 7 },
-  "simulation": { "duration": 300 },
-  "lights":     { "min_green": 8, "max_green": 45 },
-  "fixed":      { "ns_green": 25, "ew_green": 35 }
+  "traffic": {
+    "scenario": "rush_hour",
+    "seed": 7
+  },
+  "simulation": {
+    "duration": 300
+  },
+  "lights": {
+    "min_green": 8,
+    "max_green": 45
+  },
+  "fixed": {
+    "ns_green": 25,
+    "ew_green": 35
+  }
 }
 ```
 
-## How the simulation works
+Settings are validated when loaded. Invalid values, unsupported scenarios, incorrect types, and out-of-range parameters produce explanatory errors.
 
-* **Roads:** four approach roads (north, south, east, west). Vehicles on a road drive
-  towards the intersection, stop at the stop line on red and drive straight through.
-* **Vehicles:** each driver has a slightly different top speed, accelerates and
-  brakes smoothly, keeps a safe gap to the car in front, and tracks waiting time,
-  travel time and number of stops.
-* **Traffic light:** two phases (North/South, East/West). Every change goes
-  green -> yellow -> all-red -> other phase. The light enforces a **minimum green**
-  (early switch requests are ignored), a **maximum green** (it switches by itself) and
-  makes conflicting greens impossible. Whoever controls the light, including the
-  future RL agent, can only *request* a switch and cannot bypass these rules.
-* **Yellow rule:** on yellow a vehicle stops if it comfortably can, and drives
-  through only if it cannot stop in time. Settings are rejected if yellow + all-red is
-  too short for vehicles to clear the crossing.
-* **Traffic:** seven scenarios (low, medium, high, rush hour, balanced, uneven,
-  random). Traffic depends only on the seed, scenario and clock, never on what the
-  light does. This is what will make the fixed-vs-RL comparison fair.
-* **No lost vehicles:** if a road is full, new arrivals wait outside the map and their
-  waiting time still counts, so no controller can look better by losing cars.
-* **Fixed-time controller (the baseline):** repeats NS green -> yellow -> all-red ->
-  EW green -> yellow -> all-red with configurable green times (default 30 s each,
-  yellow 5 s, all-red 2 s). It ignores traffic completely, like a plain timed signal.
-  Green times must lie between the light's minimum and maximum green, otherwise the
-  settings are rejected with an explanation.
-* **Metrics:** waiting time, queue length, throughput, travel time and stops, plus
-  percent-improvement formulas, all defined in [docs/METRICS.md](docs/METRICS.md).
-  Two waiting-time averages are reported (served vehicles, and all vehicles including
-  those still stuck), so a controller cannot look good just by leaving cars behind.
-  Averages that cannot be computed show `n/a`, never a misleading 0.
-* **Safety self-check:** every step the simulator checks that vehicles from both road
-  pairs are never in the crossing box together; the demo reports the result.
+</details>
 
-## Project structure
-
-```text
-smart-traffic-rl/
-├── main.py                     entry point / command line
-├── config/settings.py          all settings, scenarios and validation
-├── controllers/
-│   ├── base.py                 the interface every controller follows
-│   ├── fixed_controller.py     the fixed-time baseline
-│   ├── rl_controller.py        runs a trained agent (epsilon 0)
-│   └── tuning.py               finds the tuned fixed-time green times
-├── agents/q_learning.py        Q-table, epsilon-greedy, update rule, model save/load
-├── training/trainer.py         training loop, CSV log, pause/stop, best-policy selection
-├── training/workflow.py        training as a whole job (used by the training screen)
-├── environment/
-│   ├── enums.py                Direction, Phase, signal colours
-│   ├── vehicle.py              one vehicle: motion, waiting time, stops
-│   ├── road.py                 one approach road: queues, stop line, spacing
-│   ├── traffic_light.py        light state machine and safety rules
-│   └── rl_env.py               RL environment: state, actions, reward
-├── simulation/
-│   ├── traffic_generator.py    seeded vehicle arrivals per scenario
-│   ├── simulator.py            roads + light + generator, step by step
-│   ├── runner.py               one full episode: simulator + controller + metrics
-│   ├── headless_demo.py        text report used by --demo
-│   └── env_demo.py             random-agent demo used by --env-demo
-├── ui/                         the windows (pygame is imported only when used)
-│   ├── app.py  widgets.py      application, screen base class; progress bar, chart, table, dialog
-│   ├── jobs.py                 background thread for training / experiments (plain Python)
-│   ├── settings_form.py        settings screen logic (plain Python)
-│   ├── results_data.py         reads saved experiments (plain Python)
-│   ├── screens/                menu, watch, compare, training, experiment, results, settings, about
-│   ├── theme.py  geometry.py   colours; road layout and drive side (plain Python)
-│   ├── snapshot.py session.py  frozen states, interpolation; play/pause/speed logic
-│   ├── components.py           fonts, text wrapping, buttons
-│   ├── scene.py hud.py         drawing the intersection; side panel, help, results card
-│   └── simulation_screen.py    events, buttons, window loop, screenshots
-├── evaluation/
-│   ├── metrics.py              metrics, time series, improvement formulas
-│   ├── seeds.py  stats.py      separate seed ranges; mean, 95 % interval, paired comparison
-│   ├── experiment.py           runs all controllers on identical seeds
-│   ├── export.py  graphs.py    CSV / JSON / Markdown files; matplotlib graphs
-│   └── formatting.py           metrics and experiments as readable text
-├── utils/                      safe paths, logging
-├── tests/                      automated tests (unittest)
-├── docs/                       DEVELOPMENT_PLAN.md, METRICS.md, RL_ENVIRONMENT.md, Q_LEARNING.md, EXPERIMENTS.md, USER_INTERFACE.md, images/
-├── models/  results/  logs/    created and used in later phases
-└── LICENSE  requirements.txt  .gitignore
-```
-
-## Testing
+<details>
+<summary><strong>🧪 Run the automated tests</strong></summary>
 
 ```powershell
 python -m unittest discover -s tests -t .
 ```
 
-543 tests currently pass (the window tests run without a display). Besides unit tests of each class, the simulator tests run
-whole simulations in every scenario, with and without aggressive light-switch
-requests, and verify on every step that: no vehicle runs a red light, no vehicles
-overlap, no conflicting traffic is in the crossing, no vehicle gets stuck, vehicles
-are never created or lost, and identical seeds reproduce identical results.
+The existing test suite reports 578 passing tests. The documented coverage run exercised 97% of the code; coverage and test counts should be rechecked after future changes.
 
-Phase 3 tests check that the fixed controller's green, yellow and all-red times are
-exact (also for other time steps), that metric formulas match hand-computed values,
-that a hand-rolled measurement agrees with the collector, and that completely
-different controllers face exactly the same vehicles (fair comparison).
+</details>
 
-Phase 4 tests cover the geometry (lanes on the correct side, opposite directions never
-overlapping), snapshot interpolation, play/pause/speed timing, every key and button, the
-drawing at several window sizes, themes and drive sides, screenshots, and that a signal
-head lights only the colour it should.
+## 🧠 How Reinforcement Learning Works
 
-Phase 5 tests check the 18-state encoding and thresholds, that the agent only ever sees
-steady-green states, that refused switches are harmless, that an agent asking to switch at
-every chance still obeys the minimum green and never causes a conflict, the reward formula
-against hand calculation, determinism, and that the agent cannot change which vehicles arrive.
+The agent interacts with a simulated environment through a repeated cycle:
 
-Phase 6 tests check the update rule against hand calculation, epsilon-greedy rates, model files
-(round trip, atomic saving, every kind of damage, mismatched state design), training
-(determinism, CSV log, stop/pause/resume, validation and best-policy selection, separate seed
-ranges), and that a trained agent in `run_episode` makes exactly the decisions it made in the
-training environment, for several decision intervals.
+```text
+       ┌───────────────────────────┐
+       │ Observe traffic conditions│
+       └─────────────┬─────────────┘
+                     ▼
+       ┌───────────────────────────┐
+       │ Encode one of 18 states   │
+       └─────────────┬─────────────┘
+                     ▼
+       ┌───────────────────────────┐
+       │ Select KEEP or SWITCH     │
+       └─────────────┬─────────────┘
+                     ▼
+       ┌───────────────────────────┐
+       │ Simulator enforces safety │
+       └─────────────┬─────────────┘
+                     ▼
+       ┌───────────────────────────┐
+       │ Calculate reward and next │
+       │ state                     │
+       └─────────────┬─────────────┘
+                     ▼
+       ┌───────────────────────────┐
+       │ Update the Q-table        │
+       └─────────────┬─────────────┘
+                     │
+                     └──── Repeat
+```
 
-Phase 7 tests check the statistics against hand calculation, identical traffic across controllers, that tuning
-uses separate seeds, the reward grid, file contents against the in-memory results, real PNG graphs, and the
-command line (`--experiment` with and without a model, bad input).
+### State space
 
-Phase 8 tests click every button of every screen (also with the keyboard), check that training and experiments really
-run, pause, stop and save from the window, that leaving asks first, that invalid settings can never be saved, that both
-sides of the comparison see identical traffic and give the same numbers as separate runs, and that every screen draws
-without overlapping buttons at several window sizes and in both themes.
+The state combines three pieces of information:
 
-Phase 9 tests feed hostile settings and model files, odd command lines, failing file systems and broken screens to the program and check that it always answers with a clear message instead of crashing.
+- North–South traffic level
+- East–West traffic level
+- Current traffic-light phase
 
-The checks were themselves verified by deliberately injecting bugs (ignoring signals,
-removing following distance, wrong green times, wrong averages, flipped improvement
-sign, ...) and confirming the tests fail every time.
+This gives the environment 18 possible discrete states.
 
-## Logging and privacy
+### Actions
 
-Technical details are written to `logs/application.log`. Nothing is collected or sent
-anywhere; the application works completely offline.
+| Action | Meaning |
+|---|---|
+| `KEEP` | Request that the current phase remain active |
+| `SWITCH` | Request a change to the other phase |
 
-## Limitations (so far)
+The agent requests a switch; it does not directly control the signal hardware or override the simulator's safety rules.
 
-* In the real results a tuned fixed-time timer matches the agent in most scenarios (see above).
-* One intersection, straight-through traffic only, simplified vehicle behaviour.
-* Simulated traffic only; no real data, cameras, pedestrians or emergency vehicles.
-* The window has been rendered and tested only off-screen (no real display) on Linux,
-  so real-time smoothness on your machine is unchecked; try `--window` and tell me.
-* Tested on Linux with Python 3.13; paths use `pathlib` so Windows is expected to
-  work, but has not yet been run on a Windows machine.
+### Reward
 
-## License
+The reward considers the reduction in waiting vehicles, a penalty for switching phases, and an excess-queue penalty. This encourages the agent to reduce congestion without switching unnecessarily.
 
-MIT, see [LICENSE](LICENSE). Replace the placeholder name in the license file with
-your own.
+### Q-Learning update
+
+The standard Q-Learning update is:
+
+\[
+Q(s,a) \leftarrow Q(s,a) +
+\alpha \left[r+\gamma\max_{a'}Q(s',a')-Q(s,a)\right]
+\]
+
+Where:
+
+- \(s\) is the current state.
+- \(a\) is the selected action.
+- \(r\) is the reward.
+- \(s'\) is the next state.
+- \(\alpha\) is the learning rate.
+- \(\gamma\) is the discount factor.
+
+During training, epsilon-greedy exploration balances trying different actions with choosing actions that currently have high Q-values. During evaluation, the trained controller acts greedily with exploration disabled.
+
+For the complete state definitions, reward formula, thresholds, and update details, see [RL Environment](docs/RL_ENVIRONMENT.md) and [Q-Learning Explained](docs/Q_LEARNING.md).
+
+## 🚦 Traffic-Light Safety
+
+The traffic-light state machine—not the learning agent—enforces the signal-transition rules.
+
+Every phase change follows:
+
+**GREEN → YELLOW → ALL-RED → GREEN**
+
+The simulator includes:
+
+- Minimum green duration
+- Maximum green duration
+- Yellow clearance
+- All-red clearance
+- Prevention of conflicting green phases
+- Validation of clearance settings
+- Safe handling of early or repeated switch requests
+
+Vehicles stop at red signals, respond to yellow according to the modeled stopping rule, maintain following distances, and move through the intersection according to the simulation's signal state.
+
+The simulator also checks that vehicles from conflicting road pairs do not occupy the crossing box simultaneously.
+
+**Important:** These are safety invariants of an educational model, not certification of a real-world traffic controller.
+
+## 🔬 Experimental Methodology
+
+The experiment runner compares three controller configurations:
+
+| Controller | Purpose |
+|---|---|
+| Default fixed-time | Establishes a simple 30/30-second green-time baseline |
+| Tuned fixed-time | Uses separate tuning traffic to find better fixed green durations |
+| Q-Learning | Evaluates the learned policy without exploration |
+
+The comparison uses identical traffic seeds for all controllers within each paired run. Traffic generation depends on the scenario, seed, and simulation clock rather than the controller's decisions.
+
+The workflow reports mean performance, 95% confidence intervals, and paired seed-by-seed comparisons. Tuning uses separate seeds to reduce the risk of giving the tuned baseline an unfair advantage on its evaluation traffic.
+
+This is a simulation-based evaluation, not a claim of real-world traffic improvement.
+
+## 🏗️ Project Architecture
+
+```text
+smart-traffic-rl/
+│
+├── main.py
+│
+├── config/
+│   └── settings.py
+│
+├── controllers/
+│   ├── base.py
+│   ├── fixed_controller.py
+│   ├── rl_controller.py
+│   └── tuning.py
+│
+├── agents/
+│   └── q_learning.py
+│
+├── environment/
+│   ├── enums.py
+│   ├── vehicle.py
+│   ├── road.py
+│   ├── traffic_light.py
+│   └── rl_env.py
+│
+├── simulation/
+│   ├── traffic_generator.py
+│   ├── simulator.py
+│   ├── runner.py
+│   ├── headless_demo.py
+│   └── env_demo.py
+│
+├── training/
+│   ├── trainer.py
+│   └── workflow.py
+│
+├── evaluation/
+│   ├── metrics.py
+│   ├── seeds.py
+│   ├── stats.py
+│   ├── experiment.py
+│   ├── export.py
+│   ├── graphs.py
+│   └── formatting.py
+│
+├── ui/
+│   ├── app.py
+│   ├── jobs.py
+│   ├── settings_form.py
+│   ├── results_data.py
+│   ├── screens/
+│   ├── theme.py
+│   ├── geometry.py
+│   ├── snapshot.py
+│   ├── session.py
+│   ├── components.py
+│   ├── scene.py
+│   ├── hud.py
+│   └── simulation_screen.py
+│
+├── utils/
+├── tests/
+├── docs/
+│   └── images/
+│
+├── models/
+├── results/
+├── logs/
+│
+├── requirements.txt
+├── README.md
+├── LICENSE
+└── .gitignore
+```
+
+### Main components
+
+- **`environment/`** — vehicle behavior, roads, traffic signals, and the RL environment.
+- **`simulation/`** — seeded traffic generation and episode execution.
+- **`agents/`** — Q-table, exploration, updates, and model persistence.
+- **`controllers/`** — shared controller interface, fixed-time logic, RL decisions, and tuning.
+- **`training/`** — episode training, validation, logging, and best-policy selection.
+- **`evaluation/`** — metrics, paired experiments, statistical summaries, and exports.
+- **`ui/`** — desktop screens, drawing, controls, and background jobs.
+- **`tests/`** — unit, integration, regression, and application behavior tests.
+- **`docs/`** — project report, guides, methodology, and supporting screenshots.
+
+## 🧪 Testing & Quality Assurance
+
+The project's automated suite contains **578 passing tests** according to the current project results.
+
+The tests cover:
+
+- Vehicle movement, spacing, road capacity, and traffic generation.
+- Red-light compliance and conflicting-traffic safety.
+- Reproducibility with identical seeds.
+- Fixed-time phase durations and controller behavior.
+- RL state encoding, reward calculations, and Q-Learning updates.
+- Training, interruption, validation, and model persistence.
+- Fair comparisons between controllers.
+- Statistical calculations and exported files.
+- User-interface interactions, themes, window sizes, and screenshots.
+- Invalid configuration, corrupted models, and error handling.
+- Documentation consistency with implementation.
+
+The documented coverage run reached 97%. The project also reports deliberately injected bugs that were detected by regression tests.
+
+Run the suite yourself before submitting or releasing a modified version:
+
+```powershell
+python -m unittest discover -s tests -t .
+```
+
+See the [QA Checklist](docs/QA_CHECKLIST.md) for the documented checks and their limitations.
+
+## 📂 Documentation
+
+| Document | Description |
+|---|---|
+| [User Guide](docs/USER_GUIDE.md) | Installation, operation, training, experiments, and results |
+| [Developer Guide](docs/DEVELOPER_GUIDE.md) | Architecture, implementation, and extension points |
+| [RL Explained](docs/RL_EXPLAINED.md) | Plain-language explanation of the learning process and learned policy |
+| [Project Report](docs/PROJECT_REPORT.md) | Academic project report and experimental findings |
+| [Viva Questions](docs/VIVA_QUESTIONS.md) | Oral examination preparation |
+| [Experiments](docs/EXPERIMENTS.md) | Evaluation methodology, seeds, and experiment outputs |
+| [Metrics](docs/METRICS.md) | Metric definitions and calculation formulas |
+| [RL Environment](docs/RL_ENVIRONMENT.md) | State space, actions, reward, and environment behavior |
+| [Q-Learning](docs/Q_LEARNING.md) | Update rule, exploration, model format, and training |
+| [User Interface](docs/USER_INTERFACE.md) | Screens, keyboard shortcuts, and interaction design |
+| [Reliability](docs/RELIABILITY.md) | Input validation, damaged-file handling, and failure recovery |
+| [Development Plan](docs/DEVELOPMENT_PLAN.md) | Project phases and implementation decisions |
+| [QA Checklist](docs/QA_CHECKLIST.md) | Final quality-assurance scope and limitations |
+
+## ⌨️ Simulation Controls
+
+When the simulation window is open, use the following keyboard shortcuts:
+
+| Key | Action |
+|---|---|
+| `Space` | Pause or resume; replay when the run finishes |
+| `S` or `Right` | Run one simulation step, pausing first |
+| `+` / `-` or `Up` / `Down` | Increase or decrease simulation speed |
+| `1`–`5` | Set speed to 0.5×, 1×, 2×, 5×, or 10× |
+| `R` | Restart using the same traffic |
+| `N` | Generate new traffic using the next seed |
+| `T` / `D` | Toggle statistics or debug information |
+| `H` | Show keyboard help |
+| `Esc` or `Q` | Close help, then quit |
+
+The display uses blue for moving vehicles and orange for waiting vehicles. Traffic signals also display their state as text, so their meaning is not conveyed by color alone.
+
+The visual layer interpolates motion between simulation steps. It does not change the underlying simulation decisions or metrics.
+
+## ⚙️ Reproducibility
+
+Reproducibility is central to the project's experimental design.
+
+The same seed, scenario, and simulation configuration generate the same traffic sequence. This makes it possible to replay an episode, debug controller behavior, and compare policies on identical traffic.
+
+For reliable comparisons:
+
+1. Keep the simulation settings consistent.
+2. Use identical evaluation seeds across controllers.
+3. Keep tuning seeds separate from evaluation seeds.
+4. Compare the same performance metrics.
+5. Inspect the generated data rather than relying only on a graph.
+6. Report limitations alongside improvements.
+
+## ⚠️ Limitations & Future Work
+
+### Current limitations
+
+- One simulated four-way intersection.
+- Straight-through vehicle movement only.
+- Simplified vehicle and driver behavior.
+- No pedestrians, emergency vehicles, cameras, or real traffic data.
+- A small tabular state space and a limited action set.
+- A tuned fixed-time controller matches or exceeds RL in several scenarios.
+- The graphical interface has been tested off-screen on Linux; actual display smoothness remains unverified on the target machine.
+- The documented testing environment is Linux with Python 3.13. Windows compatibility is expected, but has not yet been verified by a Windows test run.
+
+### Possible extensions
+
+- More complex intersections and turning movements.
+- Pedestrian crossings and emergency-vehicle scenarios.
+- Additional state representations and reward-function comparisons.
+- Larger traffic networks and coordinated signals.
+- More extensive parameter sensitivity analysis.
+- Comparisons with additional conventional and learning-based methods.
+- Validation against independently sourced traffic data.
+
+These extensions would require additional testing and should not be presented as implemented features until they have been developed and evaluated.
+
+## 🔐 Logging & Privacy
+
+The application writes technical information to:
+
+```text
+logs/application.log
+```
+
+The current application is designed to work locally and offline. It does not intentionally collect or transmit application data to external services.
+
+## 🛣️ Development Progress
+
+All 11 documented implementation phases are complete.
+
+| Phase | Deliverable | Status |
+|---:|---|---|
+| 1 | Project foundation and validated settings | ✅ Complete |
+| 2 | Headless traffic simulation | ✅ Complete |
+| 3 | Fixed-time controller and metrics | ✅ Complete |
+| 4 | Pygame visualization | ✅ Complete |
+| 5 | RL environment and safety enforcement | ✅ Complete |
+| 6 | Q-Learning training and model persistence | ✅ Complete |
+| 7 | Experiments, statistics, and exports | ✅ Complete |
+| 8 | Application menu and interactive screens | ✅ Complete |
+| 9 | Reliability and error handling | ✅ Complete |
+| 10 | Tests and documentation | ✅ Complete |
+| 11 | Final QA and rule audit | ✅ Complete |
+
+For the detailed implementation history, see [Development Plan](docs/DEVELOPMENT_PLAN.md).
+
+## 📜 License
+
+This project is distributed under the MIT License. See [LICENSE](LICENSE) for the full terms.
+
+Before publishing, replace any placeholder author information in the license file with the appropriate details.
+
+---
+
+<div align="center">
+
+### 🚦 Simulate. Learn. Evaluate. Improve.
+
+**Smart Traffic Light Control Using Reinforcement Learning**
+
+An academic exploration of intelligent traffic management through simulation and data-driven evaluation.
+
+<br>
+
+*Built with Python · Powered by Q-Learning · Designed for experimentation*
+
+</div>

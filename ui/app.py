@@ -31,6 +31,9 @@ TOAST_SECONDS = 6.0
 MIN_WINDOW = (640, 480)  # smaller windows cannot hold the screens; the size is raised to this
 MAX_CONSECUTIVE_FAILURES = 3
 
+#: Shown when there is no model file; the only case where the model is "none" rather than "bad".
+NO_MODEL_MESSAGE = "No trained model yet - use \"Train the agent\" first."
+
 
 @dataclass
 class AppPaths:
@@ -219,6 +222,7 @@ class App:
         self.screen: Screen | None = None
         self.quit_requested = False
         self.failures = 0  # consecutive frames that raised an unexpected error
+        self._frame_failed = False  # did anything fail since the last frame was drawn?
         self.fatal_message = ""
         self.toast: tuple[str, str] | None = None
         self._toast_left = 0.0
@@ -259,7 +263,7 @@ class App:
         agent, message = self._load_model()
         if agent is not None:
             return "ok", message
-        return ("none" if not self.paths.model_path.exists() else "bad"), message
+        return ("none" if message == NO_MODEL_MESSAGE else "bad"), message
 
     def load_agent(self) -> QLearningAgent | None:
         """A fresh copy of the trained agent (None if there is no usable model)."""
@@ -275,7 +279,7 @@ class App:
             key = (str(path), stat.st_mtime_ns, stat.st_size, self.settings.rl.medium_traffic,
                    self.settings.rl.high_traffic, self.settings.rl.decision_interval)
         except FileNotFoundError:
-            return None, "No trained model yet - use \"Train the agent\" first."
+            return None, NO_MODEL_MESSAGE
         except OSError as exc:
             return None, f"The model file cannot be read ({exc.strerror or exc})."
         if self._model_cache is not None and self._model_cache[0] == key:
@@ -308,8 +312,12 @@ class App:
             self._guard(lambda: self.screen.handle_event(event))
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Draw the frame. Drawing ends a frame, so this is also where a clean frame resets the failure count."""
         if self.screen is not None:
             self._guard(lambda: self.screen.draw(surface))
+        if not self._frame_failed:
+            self.failures = 0
+        self._frame_failed = False
 
     # ---- the safety net --------------------------------------------------------------------------------
 
@@ -326,6 +334,7 @@ class App:
             action()
         except Exception:  # noqa: BLE001 - last line of defence of the window
             self.failures += 1
+            self._frame_failed = True
             name = self.screen.name if self.screen else "?"
             log.exception("Unexpected error on screen %s", name)
             if self.failures > MAX_CONSECUTIVE_FAILURES:
@@ -337,8 +346,6 @@ class App:
                         "Details are in logs/application.log.", "warning")
             if self.screen is None or self.screen.name != "menu":
                 self.go("menu")
-        else:
-            self.failures = 0
 
 
 def clamp_size(size: tuple[int, int]) -> tuple[int, int]:

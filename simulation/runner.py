@@ -1,7 +1,7 @@
 """Runs one complete episode: a simulator, a controller and the metrics.
 
 This is the single place where "controller + simulator + measurements" are put
-together, so a fixed-time run and (later) an RL run are executed and measured in
+together, so a fixed-time run and an RL run are executed and measured in
 exactly the same way.
 """
 

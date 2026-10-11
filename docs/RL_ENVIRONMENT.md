@@ -89,4 +89,5 @@ python main.py --env-demo --scenario rush_hour --duration 300 --env-episodes 3
 ```
 
 This plays a **random** agent. It does not learn and is not the comparison baseline; it
-only shows that full episodes run safely. Learning arrives in Phase 6.
+only shows that full episodes run safely. The learning agent is in `agents/q_learning.py`
+(see Q_LEARNING.md).
